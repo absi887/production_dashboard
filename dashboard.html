@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Batch Tracker - Production Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --text: #334155;
+            --text-light: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .last-update {
+            color: var(--text-light);
+            font-size: 0.85em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), transparent);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .stat-card.success { border-left-color: var(--success); }
+        .stat-card.warning { border-left-color: var(--warning); }
+        .stat-card.danger { border-left-color: var(--danger); }
+        .stat-card.info { border-left-color: var(--primary); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-card h3 {
+            color: var(--text-light);
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            font-size: 1.5em;
+            opacity: 0.3;
+        }
+
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-sub {
+            color: var(--text-light);
+            font-size: 0.85em;
+        }
+
+        .stat-trend {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .trend-up {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chart-section h2 {
+            color: var(--dark);
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .data-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .data-section h2 {
+            color: var(--dark);
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-btn {
+            padding: 10px 15px;
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 65vh;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge-start { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-pause { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .badge-resume { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .badge-end { background: rgba(139, 92, 246, 0.1); color: var(--secondary); }
+        .badge-status { background: rgba(100, 116, 139, 0.1); color: #64748b; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <span class="status-indicator"></span>
+                <h1>Production Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                    <span class="last-update" id="lastUpdate">Loading...</span>
+                    <span class="last-update" id="serverStatus" style="font-size: 0.75em;">Server: Checking...</span>
+                </div>
+                <button class="btn btn-primary" onclick="exportData()" style="background: var(--success);">
+                    <span>📥</span> Export CSV
+                </button>
+                <button class="btn btn-primary" onclick="loadData()">
+                    <span>🔄</span> Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <h3>Total Batches</h3>
+                    <span class="stat-icon">📦</span>
+                </div>
+                <div class="stat-value" id="totalBatches">0</div>
+                <div class="stat-sub">Completed batches</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-header">
+                    <h3>Total Runtime</h3>
+                    <span class="stat-icon">⏱️</span>
+                </div>
+                <div class="stat-value" id="totalRuntime">00:00:00</div>
+                <div class="stat-sub">Cumulative time</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <h3>Avg Efficiency</h3>
+                    <span class="stat-icon">📊</span>
+                </div>
+                <div class="stat-value" id="avgEfficiency">0%</div>
+                <div class="stat-sub">Production efficiency</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="efficiencyProgress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <h3>Production Rate</h3>
+                    <span class="stat-icon">⚡</span>
+                </div>
+                <div class="stat-value" id="avgProductionRate">0</div>
+                <div class="stat-sub">Batches per hour</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-header">
+                    <h3>Avg Duration</h3>
+                    <span class="stat-icon">⏳</span>
+                </div>
+                <div class="stat-value" id="avgDuration">00:00</div>
+                <div class="stat-sub">Per batch</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-header">
+                    <h3>Total Pauses</h3>
+                    <span class="stat-icon">⏸️</span>
+                </div>
+                <div class="stat-value" id="totalPauses">0</div>
+                <div class="stat-sub">All batches</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <h3>Best Efficiency</h3>
+                    <span class="stat-icon">⭐</span>
+                </div>
+                <div class="stat-value" id="bestEfficiency">0%</div>
+                <div class="stat-sub">Highest recorded</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <h3>Total Events</h3>
+                    <span class="stat-icon">📝</span>
+                </div>
+                <div class="stat-value" id="totalEvents">0</div>
+                <div class="stat-sub">All events logged</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-section">
+                <h2>📈 Batch Efficiency Trend</h2>
+                <div class="chart-container">
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-section">
+                <h2>🚀 Production Rate</h2>
+                <div class="chart-container">
+                    <canvas id="productionChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-section">
+                <h2>⏱️ Batch Duration</h2>
+                <div class="chart-container">
+                    <canvas id="durationChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-section">
+                <h2>📊 Efficiency vs Production Rate</h2>
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <h2>
+                <span>📋 Recent Activity</span>
+                <span style="font-size: 0.7em; color: var(--text-light); font-weight: normal;" id="eventCount">0 events</span>
+            </h2>
+            <div class="table-controls">
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by batch ID, event, or status..." onkeyup="filterTable()">
+                <button class="filter-btn active" onclick="filterByEvent('ALL')">All</button>
+                <button class="filter-btn" onclick="filterByEvent('START')">Start</button>
+                <button class="filter-btn" onclick="filterByEvent('END')">End</button>
+                <button class="filter-btn" onclick="filterByEvent('PAUSE')">Pause</button>
+            </div>
+            <div class="table-wrapper">
+                <div id="tableContainer">
+                    <div class="loading">Loading data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let efficiencyChart, productionChart, durationChart, comparisonChart;
+        let allData = [];
+        let currentFilter = 'ALL';
+        let socket;
+        
+        // Initialize WebSocket connection
+        function initWebSocket() {
+            socket = io();
+            
+            socket.on('connect', function() {
+                console.log('✅ Connected to server via WebSocket');
+                document.querySelector('.status-indicator').style.background = 'var(--success)';
+                updateServerStatus('Connected', 'success');
+                socket.emit('request_update');
+            });
+            
+            socket.on('disconnect', function() {
+                console.log('❌ Disconnected from server');
+                document.querySelector('.status-indicator').style.background = 'var(--danger)';
+                updateServerStatus('Disconnected', 'danger');
+            });
+            
+            socket.on('connected', function(data) {
+                console.log('Server:', data.message);
+            });
+            
+            socket.on('new_data', function(data) {
+                console.log('📥 New data received:', data);
+                // Reload data when new batch event is received
+                loadData();
+            });
+            
+            socket.on('stats_update', function(stats) {
+                console.log('📊 Stats updated:', stats);
+                updateStatsDisplay(stats);
+            });
+            
+            socket.on('error', function(data) {
+                console.error('Error:', data.message);
+            });
+        }
+        
+        function updateStatsDisplay(stats) {
+            document.getElementById('totalBatches').textContent = stats.total_batches || 0;
+            document.getElementById('totalRuntime').textContent = stats.total_runtime_formatted || '00:00:00';
+            const efficiency = stats.avg_efficiency || 0;
+            document.getElementById('avgEfficiency').textContent = efficiency.toFixed(1) + '%';
+            document.getElementById('efficiencyProgress').style.width = efficiency + '%';
+            document.getElementById('avgProductionRate').textContent = (stats.avg_production_rate || 0).toFixed(2);
+            document.getElementById('avgDuration').textContent = stats.avg_duration_formatted || '00:00';
+            document.getElementById('totalPauses').textContent = stats.total_pauses || 0;
+            document.getElementById('bestEfficiency').textContent = (stats.best_efficiency || 0).toFixed(1) + '%';
+            document.getElementById('totalEvents').textContent = stats.total_events || 0;
+        }
+
+        // Check if opened as file
+        if (window.location.protocol === 'file:') {
+            document.body.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 600px; text-align: center;">
+                        <h1 style="color: #667eea; margin-bottom: 20px;">⚠️ Dashboard Must Be Accessed Through Server</h1>
+                        <p style="color: #666; font-size: 1.1em; margin-bottom: 30px;">
+                            This dashboard needs to be accessed through the Flask server, not opened directly as a file.
+                        </p>
+                        <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="color: #333; margin-bottom: 15px;">To access the dashboard:</h3>
+                            <ol style="text-align: left; color: #666; line-height: 2;">
+                                <li>Make sure the Flask server is running: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">python server.py</code></li>
+                                <li>Open your browser and go to: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">http://localhost:5002/</code></li>
+                                <li>Or use your local IP: <code style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px;">http://192.168.1.66:5002/</code></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 12,
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 13 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            };
+
+            efficiencyChart = new Chart(document.getElementById('efficiencyChart'), {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [{
+                        label: 'Efficiency %', 
+                        data: [], 
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }] 
+                },
+                options: chartOptions
+            });
+
+            productionChart = new Chart(document.getElementById('productionChart'), {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{
+                        label: 'Batches/Hour', 
+                        data: [], 
+                        backgroundColor: '#6366f1',
+                        borderRadius: 8
+                    }] 
+                },
+                options: chartOptions
+            });
+
+            durationChart = new Chart(document.getElementById('durationChart'), {
+                type: 'bar',
+                data: { 
+                    labels: [], 
+                    datasets: [{
+                        label: 'Duration (seconds)', 
+                        data: [], 
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 8
+                    }] 
+                },
+                options: chartOptions
+            });
+
+            comparisonChart = new Chart(document.getElementById('comparisonChart'), {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [
+                        {
+                            label: 'Efficiency %', 
+                            data: [], 
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Production Rate', 
+                            data: [], 
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ] 
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Efficiency %'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Production Rate'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            return `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function getBadgeClass(event) {
+            const classes = {
+                'START': 'badge-start',
+                'PAUSE': 'badge-pause',
+                'RESUME': 'badge-resume',
+                'END': 'badge-end',
+                'STATUS': 'badge-status'
+            };
+            return classes[event] || 'badge';
+        }
+
+        function filterByEvent(event) {
+            currentFilter = event;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            filterTable();
+        }
+
+        function filterTable() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const rows = allData.filter(row => {
+                const matchesFilter = currentFilter === 'ALL' || row.event === currentFilter;
+                const matchesSearch = !searchTerm || 
+                    row.batch_id.toString().includes(searchTerm) ||
+                    row.event.toLowerCase().includes(searchTerm) ||
+                    row.status.toLowerCase().includes(searchTerm);
+                return matchesFilter && matchesSearch;
+            });
+            displayTable(rows);
+        }
+
+        function displayTable(rows) {
+            if (rows.length === 0) {
+                document.getElementById('tableContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No data found</h3>
+                        <p>Try adjusting your filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Batch ID</th>
+                            <th>Event</th>
+                            <th>Status</th>
+                            <th>Duration</th>
+                            <th>Efficiency</th>
+                            <th>Production Rate</th>
+                            <th>Pauses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            rows.forEach(row => {
+                tableHTML += `
+                    <tr>
+                        <td>${row.timestamp || ''}</td>
+                        <td><strong>#${row.batch_id || ''}</strong></td>
+                        <td><span class="badge ${getBadgeClass(row.event)}">${row.event || ''}</span></td>
+                        <td>${row.status || ''}</td>
+                        <td>${row.batch_duration_formatted || row.total_elapsed_formatted || '00:00'}</td>
+                        <td>${parseFloat(row.efficiency_percent || 0).toFixed(1)}%</td>
+                        <td>${parseFloat(row.production_rate_per_hour || 0).toFixed(2)}</td>
+                        <td>${row.pause_count || 0}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            document.getElementById('tableContainer').innerHTML = tableHTML;
+            document.getElementById('eventCount').textContent = `${rows.length} events`;
+        }
+
+        async function loadData() {
+            try {
+                // Load stats
+                const statsRes = await fetch('/api/stats');
+                if (!statsRes.ok) throw new Error(`HTTP error! status: ${statsRes.status}`);
+                const stats = await statsRes.json();
+                
+                updateStatsDisplay(stats);
+
+                // Load batches
+                const batchesRes = await fetch('/api/batches');
+                if (!batchesRes.ok) throw new Error(`HTTP error! status: ${batchesRes.status}`);
+                const batchesData = await batchesRes.json();
+                const batches = batchesData.batches || [];
+
+                // Update charts
+                const recentBatches = batches.slice(0, 15);
+                const batchIds = recentBatches.map(b => '#' + b.batch_id);
+                const efficiencies = recentBatches.map(b => b.efficiency);
+                const productionRates = recentBatches.map(b => b.production_rate);
+                const durations = recentBatches.map(b => b.duration_s);
+
+                efficiencyChart.data.labels = batchIds;
+                efficiencyChart.data.datasets[0].data = efficiencies;
+                efficiencyChart.update('active');
+
+                productionChart.data.labels = batchIds;
+                productionChart.data.datasets[0].data = productionRates;
+                productionChart.update('active');
+
+                durationChart.data.labels = batchIds;
+                durationChart.data.datasets[0].data = durations;
+                durationChart.update('active');
+
+                // Update comparison chart
+                comparisonChart.data.labels = batchIds;
+                comparisonChart.data.datasets[0].data = efficiencies;
+                comparisonChart.data.datasets[1].data = productionRates;
+                comparisonChart.update('active');
+
+                // Load all data for table
+                const dataRes = await fetch('/api/data');
+                if (!dataRes.ok) throw new Error(`HTTP error! status: ${dataRes.status}`);
+                const data = await dataRes.json();
+                allData = (data.data || []).reverse(); // Newest first
+                
+                filterTable();
+
+                // Update last update time
+                document.getElementById('lastUpdate').textContent = 
+                    'Last updated: ' + new Date().toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                const errorMsg = error.message.includes('Failed to fetch') 
+                    ? 'Cannot connect to server. Make sure the Flask server is running on port 5002.'
+                    : `Error: ${error.message}`;
+                
+                document.getElementById('tableContainer').innerHTML = 
+                    `<div class="loading" style="color: #ef4444;">
+                        <strong>⚠️ ${errorMsg}</strong><br><br>
+                        <small>Make sure you're accessing this page through: <code>http://localhost:5002/</code></small>
+                    </div>`;
+            }
+        }
+
+        function exportData() {
+            window.location.href = '/api/export';
+        }
+        
+        function updateServerStatus(status, type) {
+            const statusEl = document.getElementById('serverStatus');
+            const colors = {
+                'success': 'var(--success)',
+                'danger': 'var(--danger)',
+                'warning': 'var(--warning)'
+            };
+            statusEl.textContent = `Server: ${status}`;
+            statusEl.style.color = colors[type] || 'var(--text-light)';
+        }
+        
+        async function checkServerStatus() {
+            try {
+                const res = await fetch('/api/server/status');
+                if (res.ok) {
+                    const data = await res.json();
+                    updateServerStatus('Running', 'success');
+                } else {
+                    updateServerStatus('Error', 'danger');
+                }
+            } catch (error) {
+                updateServerStatus('Offline', 'danger');
+            }
+        }
+
+        // Initialize charts, WebSocket, and load data
+        initCharts();
+        initWebSocket();
+        loadData();
+        checkServerStatus();
+
+        // Fallback: Auto-refresh every 30 seconds (WebSocket handles real-time updates)
+        setInterval(loadData, 30000);
+        setInterval(checkServerStatus, 10000); // Check server status every 10 seconds
+    </script>
+</body>
+</html>
