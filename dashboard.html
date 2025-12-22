@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Batch Tracker - Production Dashboard</title>
+    <title id="pageTitle">ESP32 Batch Tracker - Production Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
@@ -400,6 +400,302 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transition: width 0.3s;
         }
+
+        /* Interactive Filters Panel */
+        .filters-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-input {
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .multi-select-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            min-height: 50px;
+        }
+
+        .filter-chip {
+            padding: 6px 12px;
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-clear-filters {
+            padding: 8px 16px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-clear-filters:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .filter-indicator {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 6px;
+            background: var(--warning);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+
+        /* Stat card interactive */
+        .stat-card {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .stat-card:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .stat-card::after {
+            content: '👆 Click for details';
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.7em;
+            color: var(--text-light);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: 600;
+        }
+
+        .stat-card:hover::after {
+            opacity: 1;
+        }
+
+        .stat-card.filtered {
+            opacity: 0.5;
+        }
+
+        .stat-card.filtered.active {
+            opacity: 1;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+            border-left-width: 6px;
+        }
+
+        /* Chart interactive styling */
+        .chart-section {
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .chart-section:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .chart-section.filtered {
+            opacity: 0.6;
+        }
+
+        .chart-section::before {
+            content: '💡 Click any data point to filter';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 0.75em;
+            color: var(--text-light);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border-radius: 15px;
+            z-index: 10;
+        }
+
+        .chart-section:hover::before {
+            opacity: 1;
+        }
+
+        /* Table row interactive */
+        tr.clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        tr.clickable:hover {
+            background: rgba(99, 102, 241, 0.1) !important;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+        }
+
+        tr.clickable:active {
+            transform: scale(0.99);
+        }
+
+        tr.clickable.selected {
+            background: rgba(99, 102, 241, 0.2) !important;
+            border-left: 4px solid var(--primary);
+        }
+
+        tr.clickable::before {
+            content: '👆';
+            position: absolute;
+            left: -25px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        tr.clickable:hover::before {
+            opacity: 0.5;
+        }
+
+        /* Drill-down modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: var(--light);
+            color: var(--danger);
+        }
     </style>
 </head>
 <body>
@@ -413,13 +709,56 @@
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
                     <span class="last-update" id="lastUpdate">Loading...</span>
                     <span class="last-update" id="serverStatus" style="font-size: 0.75em;">Server: Checking...</span>
+                    <span class="last-update" id="esp32Status" style="font-size: 0.75em;">ESP32: Checking...</span>
                 </div>
+                <button class="btn btn-primary" onclick="testESP32Connection()" style="background: var(--warning);">
+                    <span>🔌</span> Test ESP32
+                </button>
                 <button class="btn btn-primary" onclick="exportData()" style="background: var(--success);">
                     <span>📥</span> Export CSV
                 </button>
                 <button class="btn btn-primary" onclick="loadData()">
                     <span>🔄</span> Refresh
                 </button>
+            </div>
+        </div>
+
+        <!-- Interactive Filters Panel -->
+        <div class="filters-panel">
+            <div class="filters-header">
+                <div class="filters-title">
+                    🔍 Interactive Filters
+                    <span class="filter-badge" id="activeFiltersCount">0 active</span>
+                </div>
+                <button class="btn-clear-filters" onclick="clearAllFilters()">Clear All Filters</button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Date Range</label>
+                    <input type="date" class="filter-input" id="dateFrom" onchange="applyFilters()">
+                    <input type="date" class="filter-input" id="dateTo" onchange="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Batch ID Range</label>
+                    <input type="number" class="filter-input" id="batchIdFrom" placeholder="From" onchange="applyFilters()">
+                    <input type="number" class="filter-input" id="batchIdTo" placeholder="To" onchange="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Event Types</label>
+                    <div class="multi-select-filter" id="eventFilters">
+                        <div class="filter-chip active" data-event="ALL" onclick="toggleEventFilter(this)">All</div>
+                        <div class="filter-chip" data-event="START" onclick="toggleEventFilter(this)">Start</div>
+                        <div class="filter-chip" data-event="PAUSE" onclick="toggleEventFilter(this)">Pause</div>
+                        <div class="filter-chip" data-event="RESUME" onclick="toggleEventFilter(this)">Resume</div>
+                        <div class="filter-chip" data-event="END" onclick="toggleEventFilter(this)">End</div>
+                        <div class="filter-chip" data-event="STATUS" onclick="toggleEventFilter(this)">Status</div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Efficiency Range</label>
+                    <input type="number" class="filter-input" id="efficiencyMin" placeholder="Min %" min="0" max="100" onchange="applyFilters()">
+                    <input type="number" class="filter-input" id="efficiencyMax" placeholder="Max %" min="0" max="100" onchange="applyFilters()">
+                </div>
             </div>
         </div>
 
@@ -520,11 +859,22 @@
             </div>
         </div>
 
-        <div class="data-section">
+            <div class="data-section">
             <h2>
                 <span>📋 Recent Activity</span>
                 <span style="font-size: 0.7em; color: var(--text-light); font-weight: normal;" id="eventCount">0 events</span>
             </h2>
+            
+        <!-- Drill-down Modal -->
+        <div class="modal" id="drillDownModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Drill-Down Details</h2>
+                    <button class="modal-close" onclick="closeDrillDown()">×</button>
+                </div>
+                <div id="modalBody"></div>
+            </div>
+        </div>
             <div class="table-controls">
                 <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search by batch ID, event, or status..." onkeyup="filterTable()">
                 <button class="filter-btn active" onclick="filterByEvent('ALL')">All</button>
@@ -543,8 +893,25 @@
     <script>
         let efficiencyChart, productionChart, durationChart, comparisonChart;
         let allData = [];
+        let allBatches = [];
         let currentFilter = 'ALL';
         let socket;
+        
+        // Filter state
+        let activeFilters = {
+            dateFrom: null,
+            dateTo: null,
+            batchIdFrom: null,
+            batchIdTo: null,
+            events: ['ALL'],
+            efficiencyMin: null,
+            efficiencyMax: null,
+            selectedBatchIds: [] // For cross-filtering
+        };
+        
+        // Store original data for filtering
+        let originalBatches = [];
+        let originalData = [];
         
         // Initialize WebSocket connection
         function initWebSocket() {
@@ -584,16 +951,27 @@
         }
         
         function updateStatsDisplay(stats) {
-            document.getElementById('totalBatches').textContent = stats.total_batches || 0;
-            document.getElementById('totalRuntime').textContent = stats.total_runtime_formatted || '00:00:00';
-            const efficiency = stats.avg_efficiency || 0;
-            document.getElementById('avgEfficiency').textContent = efficiency.toFixed(1) + '%';
-            document.getElementById('efficiencyProgress').style.width = efficiency + '%';
-            document.getElementById('avgProductionRate').textContent = (stats.avg_production_rate || 0).toFixed(2);
-            document.getElementById('avgDuration').textContent = stats.avg_duration_formatted || '00:00';
-            document.getElementById('totalPauses').textContent = stats.total_pauses || 0;
-            document.getElementById('bestEfficiency').textContent = (stats.best_efficiency || 0).toFixed(1) + '%';
-            document.getElementById('totalEvents').textContent = stats.total_events || 0;
+            // This is called from WebSocket updates, but we use filtered stats when filters are active
+            // So we only update if no filters are active
+            const hasFilters = activeFilters.selectedBatchIds.length > 0 || 
+                activeFilters.dateFrom || activeFilters.dateTo ||
+                activeFilters.batchIdFrom || activeFilters.batchIdTo ||
+                (activeFilters.events.length > 0 && !activeFilters.events.includes('ALL')) ||
+                activeFilters.efficiencyMin || activeFilters.efficiencyMax;
+            
+            if (!hasFilters && allBatches.length === 0) {
+                // Only update from server stats if we haven't loaded batch data yet
+                document.getElementById('totalBatches').textContent = stats.total_batches || 0;
+                document.getElementById('totalRuntime').textContent = stats.total_runtime_formatted || '00:00:00';
+                const efficiency = stats.avg_efficiency || 0;
+                document.getElementById('avgEfficiency').textContent = efficiency.toFixed(1) + '%';
+                document.getElementById('efficiencyProgress').style.width = efficiency + '%';
+                document.getElementById('avgProductionRate').textContent = (stats.avg_production_rate || 0).toFixed(2);
+                document.getElementById('avgDuration').textContent = stats.avg_duration_formatted || '00:00';
+                document.getElementById('totalPauses').textContent = stats.total_pauses || 0;
+                document.getElementById('bestEfficiency').textContent = (stats.best_efficiency || 0).toFixed(1) + '%';
+                document.getElementById('totalEvents').textContent = stats.total_events || 0;
+            }
         }
 
         // Check if opened as file
@@ -622,6 +1000,13 @@
             const chartOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                onHover: (event, activeElements) => {
+                    event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+                },
                 plugins: {
                     legend: {
                         display: true,
@@ -631,7 +1016,12 @@
                         backgroundColor: 'rgba(0,0,0,0.8)',
                         padding: 12,
                         titleFont: { size: 14 },
-                        bodyFont: { size: 13 }
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            afterLabel: function(context) {
+                                return 'Click to filter by this batch';
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -660,10 +1050,15 @@
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         borderWidth: 3,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 8
                     }] 
                 },
-                options: chartOptions
+                options: {
+                    ...chartOptions,
+                    onClick: (event, activeElements) => handleChartClick('efficiency', activeElements)
+                }
             });
 
             productionChart = new Chart(document.getElementById('productionChart'), {
@@ -677,7 +1072,10 @@
                         borderRadius: 8
                     }] 
                 },
-                options: chartOptions
+                options: {
+                    ...chartOptions,
+                    onClick: (event, activeElements) => handleChartClick('production', activeElements)
+                }
             });
 
             durationChart = new Chart(document.getElementById('durationChart'), {
@@ -691,7 +1089,10 @@
                         borderRadius: 8
                     }] 
                 },
-                options: chartOptions
+                options: {
+                    ...chartOptions,
+                    onClick: (event, activeElements) => handleChartClick('duration', activeElements)
+                }
             });
 
             comparisonChart = new Chart(document.getElementById('comparisonChart'), {
@@ -707,7 +1108,9 @@
                             borderWidth: 3,
                             fill: false,
                             tension: 0.4,
-                            yAxisID: 'y'
+                            yAxisID: 'y',
+                            pointRadius: 5,
+                            pointHoverRadius: 8
                         },
                         {
                             label: 'Production Rate', 
@@ -717,12 +1120,15 @@
                             borderWidth: 3,
                             fill: false,
                             tension: 0.4,
-                            yAxisID: 'y1'
+                            yAxisID: 'y1',
+                            pointRadius: 5,
+                            pointHoverRadius: 8
                         }
                     ] 
                 },
                 options: {
                     ...chartOptions,
+                    onClick: (event, activeElements) => handleChartClick('comparison', activeElements),
                     scales: {
                         y: {
                             type: 'linear',
@@ -774,6 +1180,353 @@
             return classes[event] || 'badge';
         }
 
+        // Interactive filtering functions
+        function toggleEventFilter(element) {
+            const event = element.getAttribute('data-event');
+            if (event === 'ALL') {
+                // If clicking ALL, clear all other selections
+                document.querySelectorAll('#eventFilters .filter-chip').forEach(chip => {
+                    chip.classList.remove('active');
+                });
+                element.classList.add('active');
+                activeFilters.events = ['ALL'];
+            } else {
+                // Remove ALL if it's active
+                const allChip = document.querySelector('#eventFilters .filter-chip[data-event="ALL"]');
+                if (allChip) allChip.classList.remove('active');
+                
+                element.classList.toggle('active');
+                if (activeFilters.events.includes('ALL')) {
+                    activeFilters.events = [];
+                }
+                
+                if (element.classList.contains('active')) {
+                    if (!activeFilters.events.includes(event)) {
+                        activeFilters.events.push(event);
+                    }
+                } else {
+                    activeFilters.events = activeFilters.events.filter(e => e !== event);
+                    if (activeFilters.events.length === 0) {
+                        activeFilters.events = ['ALL'];
+                        allChip.classList.add('active');
+                    }
+                }
+            }
+            applyFilters();
+        }
+
+        function applyFilters() {
+            // Update filter state from inputs
+            activeFilters.dateFrom = document.getElementById('dateFrom').value || null;
+            activeFilters.dateTo = document.getElementById('dateTo').value || null;
+            activeFilters.batchIdFrom = document.getElementById('batchIdFrom').value ? parseInt(document.getElementById('batchIdFrom').value) : null;
+            activeFilters.batchIdTo = document.getElementById('batchIdTo').value ? parseInt(document.getElementById('batchIdTo').value) : null;
+            activeFilters.efficiencyMin = document.getElementById('efficiencyMin').value ? parseFloat(document.getElementById('efficiencyMin').value) : null;
+            activeFilters.efficiencyMax = document.getElementById('efficiencyMax').value ? parseFloat(document.getElementById('efficiencyMax').value) : null;
+            
+            updateFilterCount();
+            filterData();
+            updateVisuals();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('batchIdFrom').value = '';
+            document.getElementById('batchIdTo').value = '';
+            document.getElementById('efficiencyMin').value = '';
+            document.getElementById('efficiencyMax').value = '';
+            
+            // Reset event filters
+            document.querySelectorAll('#eventFilters .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector('#eventFilters .filter-chip[data-event="ALL"]').classList.add('active');
+            
+            activeFilters = {
+                dateFrom: null,
+                dateTo: null,
+                batchIdFrom: null,
+                batchIdTo: null,
+                events: ['ALL'],
+                efficiencyMin: null,
+                efficiencyMax: null,
+                selectedBatchIds: []
+            };
+            
+            applyFilters();
+        }
+
+        function updateFilterCount() {
+            let count = 0;
+            if (activeFilters.dateFrom || activeFilters.dateTo) count++;
+            if (activeFilters.batchIdFrom || activeFilters.batchIdTo) count++;
+            if (!activeFilters.events.includes('ALL') || activeFilters.events.length > 1) count++;
+            if (activeFilters.efficiencyMin || activeFilters.efficiencyMax) count++;
+            if (activeFilters.selectedBatchIds.length > 0) count++;
+            
+            document.getElementById('activeFiltersCount').textContent = `${count} active`;
+        }
+
+        function filterData() {
+            // Filter batches
+            allBatches = originalBatches.filter(batch => {
+                // Date filter
+                if (activeFilters.dateFrom || activeFilters.dateTo) {
+                    const batchDate = new Date(batch.timestamp);
+                    if (activeFilters.dateFrom && batchDate < new Date(activeFilters.dateFrom + 'T00:00:00')) return false;
+                    if (activeFilters.dateTo && batchDate > new Date(activeFilters.dateTo + 'T23:59:59')) return false;
+                }
+                
+                // Batch ID range
+                const batchId = parseInt(batch.batch_id);
+                if (activeFilters.batchIdFrom && batchId < activeFilters.batchIdFrom) return false;
+                if (activeFilters.batchIdTo && batchId > activeFilters.batchIdTo) return false;
+                
+                // Selected batch IDs (for cross-filtering)
+                if (activeFilters.selectedBatchIds.length > 0 && !activeFilters.selectedBatchIds.includes(batch.batch_id.toString())) return false;
+                
+                // Efficiency range
+                if (activeFilters.efficiencyMin && batch.efficiency < activeFilters.efficiencyMin) return false;
+                if (activeFilters.efficiencyMax && batch.efficiency > activeFilters.efficiencyMax) return false;
+                
+                return true;
+            });
+            
+            // Filter table data
+            allData = originalData.filter(row => {
+                // Event filter
+                if (!activeFilters.events.includes('ALL') && !activeFilters.events.includes(row.event)) return false;
+                
+                // Date filter
+                if (activeFilters.dateFrom || activeFilters.dateTo) {
+                    const rowDate = new Date(row.timestamp);
+                    if (activeFilters.dateFrom && rowDate < new Date(activeFilters.dateFrom + 'T00:00:00')) return false;
+                    if (activeFilters.dateTo && rowDate > new Date(activeFilters.dateTo + 'T23:59:59')) return false;
+                }
+                
+                // Batch ID range
+                const batchId = parseInt(row.batch_id);
+                if (activeFilters.batchIdFrom && batchId < activeFilters.batchIdFrom) return false;
+                if (activeFilters.batchIdTo && batchId > activeFilters.batchIdTo) return false;
+                
+                // Selected batch IDs
+                if (activeFilters.selectedBatchIds.length > 0 && !activeFilters.selectedBatchIds.includes(row.batch_id.toString())) return false;
+                
+                // Efficiency filter
+                const efficiency = parseFloat(row.efficiency_percent || 0);
+                if (activeFilters.efficiencyMin && efficiency < activeFilters.efficiencyMin) return false;
+                if (activeFilters.efficiencyMax && efficiency > activeFilters.efficiencyMax) return false;
+                
+                return true;
+            });
+            
+            filterTable();
+        }
+
+        function updateVisuals() {
+            if (!efficiencyChart || !productionChart || !durationChart || !comparisonChart) return;
+            
+            // Update charts with filtered data
+            const recentBatches = allBatches.slice(0, 15);
+            const batchIds = recentBatches.map(b => '#' + b.batch_id);
+            const efficiencies = recentBatches.map(b => b.efficiency);
+            const productionRates = recentBatches.map(b => b.production_rate);
+            const durations = recentBatches.map(b => b.duration_s);
+
+            // Update bar chart colors based on selection
+            const productionColors = recentBatches.map(b => 
+                activeFilters.selectedBatchIds.includes(b.batch_id.toString()) ? '#4f46e5' : '#6366f1'
+            );
+            const durationColors = recentBatches.map(b => 
+                activeFilters.selectedBatchIds.includes(b.batch_id.toString()) ? '#7c3aed' : '#8b5cf6'
+            );
+
+            efficiencyChart.data.labels = batchIds;
+            efficiencyChart.data.datasets[0].data = efficiencies;
+            efficiencyChart.update('active');
+
+            productionChart.data.labels = batchIds;
+            productionChart.data.datasets[0].data = productionRates;
+            productionChart.data.datasets[0].backgroundColor = productionColors;
+            productionChart.update('active');
+
+            durationChart.data.labels = batchIds;
+            durationChart.data.datasets[0].data = durations;
+            durationChart.data.datasets[0].backgroundColor = durationColors;
+            durationChart.update('active');
+
+            comparisonChart.data.labels = batchIds;
+            comparisonChart.data.datasets[0].data = efficiencies;
+            comparisonChart.data.datasets[1].data = productionRates;
+            comparisonChart.update('active');
+            
+            // Update stats with filtered data
+            updateStatsFromFiltered();
+        }
+
+        function handleChartClick(chartType, activeElements) {
+            if (activeElements.length === 0) return;
+            
+            const element = activeElements[0];
+            const index = element.index;
+            
+            // Get batch ID from the appropriate chart
+            let chart;
+            switch(chartType) {
+                case 'efficiency':
+                    chart = efficiencyChart;
+                    break;
+                case 'production':
+                    chart = productionChart;
+                    break;
+                case 'duration':
+                    chart = durationChart;
+                    break;
+                case 'comparison':
+                    chart = comparisonChart;
+                    break;
+                default:
+                    chart = efficiencyChart;
+            }
+            
+            const batchId = chart.data.labels[index]?.replace('#', '');
+            
+            if (!batchId) return;
+            
+            // Toggle selection with visual feedback
+            const idx = activeFilters.selectedBatchIds.indexOf(batchId);
+            if (idx > -1) {
+                activeFilters.selectedBatchIds.splice(idx, 1);
+                console.log(`✓ Removed Batch #${batchId} from filter`);
+            } else {
+                activeFilters.selectedBatchIds.push(batchId);
+                console.log(`✓ Added Batch #${batchId} to filter`);
+            }
+            
+            // Show brief visual feedback
+            const chartCanvas = document.getElementById(chartType === 'comparison' ? 'comparisonChart' : chartType + 'Chart');
+            if (chartCanvas) {
+                const clickedChart = chartCanvas.closest('.chart-section');
+                if (clickedChart) {
+                    clickedChart.style.transform = 'scale(0.98)';
+                    clickedChart.style.transition = 'transform 0.2s';
+                    setTimeout(() => {
+                        clickedChart.style.transform = '';
+                    }, 200);
+                }
+            }
+            
+            updateFilterCount();
+            filterData();
+            updateVisuals();
+        }
+
+        function updateStatsFromFiltered() {
+            if (allBatches.length === 0) {
+                document.getElementById('totalBatches').textContent = '0';
+                return;
+            }
+            
+            const totalBatches = allBatches.length;
+            const totalRuntime = allBatches.reduce((sum, b) => sum + b.duration_s, 0);
+            const avgEfficiency = allBatches.reduce((sum, b) => sum + b.efficiency, 0) / totalBatches;
+            const avgProductionRate = allBatches.reduce((sum, b) => sum + b.production_rate, 0) / totalBatches;
+            const totalPauses = allBatches.reduce((sum, b) => sum + b.pause_count, 0);
+            const avgDuration = totalRuntime / totalBatches;
+            const bestEfficiency = Math.max(...allBatches.map(b => b.efficiency));
+            
+            document.getElementById('totalBatches').textContent = totalBatches;
+            document.getElementById('totalRuntime').textContent = formatTime(totalRuntime);
+            document.getElementById('avgEfficiency').textContent = avgEfficiency.toFixed(1) + '%';
+            document.getElementById('efficiencyProgress').style.width = avgEfficiency + '%';
+            document.getElementById('avgProductionRate').textContent = avgProductionRate.toFixed(2);
+            document.getElementById('avgDuration').textContent = formatTime(Math.round(avgDuration));
+            document.getElementById('totalPauses').textContent = totalPauses;
+            document.getElementById('bestEfficiency').textContent = bestEfficiency.toFixed(1) + '%';
+            document.getElementById('totalEvents').textContent = allData.length;
+        }
+
+        // Make stat cards clickable for drill-down
+        function setupStatCardClicks() {
+            // Remove existing listeners to prevent duplicates
+            document.querySelectorAll('.stat-card').forEach(card => {
+                const newCard = card.cloneNode(true);
+                card.parentNode.replaceChild(newCard, card);
+            });
+            
+            // Add click handlers
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const metricTitle = card.querySelector('h3').textContent;
+                    showDrillDown(metricTitle, index);
+                });
+                
+                // Add visual feedback
+                card.addEventListener('mouseenter', function() {
+                    card.style.transform = 'translateY(-5px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    card.style.transform = '';
+                });
+            });
+        }
+
+        function showDrillDown(metric, index) {
+            const modal = document.getElementById('drillDownModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = metric + ' - Detailed View';
+            
+            // Create drill-down content based on metric
+            let content = '<div style="margin-top: 20px;">';
+            
+            if (metric.includes('Batches')) {
+                content += `<h3>Batch Details (${allBatches.length} batches)</h3>`;
+                content += '<table style="width: 100%; margin-top: 15px;"><thead><tr><th>Batch ID</th><th>Efficiency</th><th>Duration</th><th>Production Rate</th></tr></thead><tbody>';
+                allBatches.slice(0, 20).forEach(batch => {
+                    content += `<tr><td><strong>#${batch.batch_id}</strong></td><td>${batch.efficiency.toFixed(1)}%</td><td>${batch.duration_formatted}</td><td>${batch.production_rate.toFixed(2)}</td></tr>`;
+                });
+                content += '</tbody></table>';
+            } else if (metric.includes('Efficiency')) {
+                const sorted = [...allBatches].sort((a, b) => b.efficiency - a.efficiency);
+                content += `<h3>Top 10 Most Efficient Batches</h3>`;
+                content += '<table style="width: 100%; margin-top: 15px;"><thead><tr><th>Rank</th><th>Batch ID</th><th>Efficiency</th><th>Duration</th></tr></thead><tbody>';
+                sorted.slice(0, 10).forEach((batch, i) => {
+                    content += `<tr><td>${i + 1}</td><td><strong>#${batch.batch_id}</strong></td><td>${batch.efficiency.toFixed(1)}%</td><td>${batch.duration_formatted}</td></tr>`;
+                });
+                content += '</tbody></table>';
+            } else if (metric.includes('Runtime') || metric.includes('Duration')) {
+                const sorted = [...allBatches].sort((a, b) => b.duration_s - a.duration_s);
+                content += `<h3>Longest Running Batches</h3>`;
+                content += '<table style="width: 100%; margin-top: 15px;"><thead><tr><th>Batch ID</th><th>Duration</th><th>Efficiency</th></tr></thead><tbody>';
+                sorted.slice(0, 10).forEach(batch => {
+                    content += `<tr><td><strong>#${batch.batch_id}</strong></td><td>${batch.duration_formatted}</td><td>${batch.efficiency.toFixed(1)}%</td></tr>`;
+                });
+                content += '</tbody></table>';
+            }
+            
+            content += '</div>';
+            modalBody.innerHTML = content;
+            modal.classList.add('active');
+        }
+
+        function closeDrillDown() {
+            document.getElementById('drillDownModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('drillDownModal');
+            if (event.target == modal) {
+                closeDrillDown();
+            }
+        }
+
         function filterByEvent(event) {
             currentFilter = event;
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -796,13 +1549,53 @@
 
         function displayTable(rows) {
             if (rows.length === 0) {
-                document.getElementById('tableContainer').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <h3>No data found</h3>
-                        <p>Try adjusting your filters</p>
-                    </div>
-                `;
+                const hasFilters = activeFilters.selectedBatchIds.length > 0 || 
+                    activeFilters.dateFrom || activeFilters.dateTo ||
+                    activeFilters.batchIdFrom || activeFilters.batchIdTo ||
+                    (activeFilters.events.length > 0 && !activeFilters.events.includes('ALL')) ||
+                    activeFilters.efficiencyMin || activeFilters.efficiencyMax;
+                
+                if (hasFilters) {
+                    document.getElementById('tableContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <h3>No data matches your filters</h3>
+                            <p>Try adjusting your filter criteria</p>
+                            <button class="btn btn-primary" onclick="clearAllFilters()" style="margin-top: 15px;">
+                                Clear All Filters
+                            </button>
+                        </div>
+                    `;
+                } else if (allData.length === 0) {
+                    document.getElementById('tableContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📡</div>
+                            <h3>No data received from ESP32</h3>
+                            <p>Waiting for ESP32 to send data...</p>
+                            <div style="margin-top: 20px; padding: 20px; background: var(--light); border-radius: 8px; text-align: left; max-width: 600px;">
+                                <h4 style="margin-bottom: 10px;">🔧 Troubleshooting:</h4>
+                                <ol style="line-height: 2; margin-left: 20px;">
+                                    <li>Check ESP32 is powered on and connected to WiFi</li>
+                                    <li>Verify ESP32 code has correct server IP address</li>
+                                    <li>Ensure ESP32 and server are on the same network</li>
+                                    <li>Click "Test ESP32" button to check connection</li>
+                                    <li>Check ESP32 Serial Monitor for errors</li>
+                                </ol>
+                                <button class="btn btn-primary" onclick="testESP32Connection()" style="margin-top: 15px;">
+                                    🔌 Test ESP32 Connection
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('tableContainer').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <h3>No data found</h3>
+                            <p>Try adjusting your filters</p>
+                        </div>
+                    `;
+                }
                 return;
             }
 
@@ -823,11 +1616,13 @@
                     <tbody>
             `;
 
-            rows.forEach(row => {
+            rows.forEach((row, index) => {
+                const isSelected = activeFilters.selectedBatchIds.includes(row.batch_id.toString());
+                const batchId = row.batch_id || '';
                 tableHTML += `
-                    <tr>
+                    <tr class="clickable ${isSelected ? 'selected' : ''}" onclick="filterByBatchId('${batchId}')" title="Click to filter by Batch #${batchId}">
                         <td>${row.timestamp || ''}</td>
-                        <td><strong>#${row.batch_id || ''}</strong></td>
+                        <td><strong>#${batchId}</strong></td>
                         <td><span class="badge ${getBadgeClass(row.event)}">${row.event || ''}</span></td>
                         <td>${row.status || ''}</td>
                         <td>${row.batch_duration_formatted || row.total_elapsed_formatted || '00:00'}</td>
@@ -845,55 +1640,44 @@
 
         async function loadData() {
             try {
-                // Load stats
+                // Load stats (for reference, but filtered stats will override when filters are active)
                 const statsRes = await fetch('/api/stats');
                 if (!statsRes.ok) throw new Error(`HTTP error! status: ${statsRes.status}`);
                 const stats = await statsRes.json();
-                
-                updateStatsDisplay(stats);
 
                 // Load batches
                 const batchesRes = await fetch('/api/batches');
                 if (!batchesRes.ok) throw new Error(`HTTP error! status: ${batchesRes.status}`);
                 const batchesData = await batchesRes.json();
                 const batches = batchesData.batches || [];
-
-                // Update charts
-                const recentBatches = batches.slice(0, 15);
-                const batchIds = recentBatches.map(b => '#' + b.batch_id);
-                const efficiencies = recentBatches.map(b => b.efficiency);
-                const productionRates = recentBatches.map(b => b.production_rate);
-                const durations = recentBatches.map(b => b.duration_s);
-
-                efficiencyChart.data.labels = batchIds;
-                efficiencyChart.data.datasets[0].data = efficiencies;
-                efficiencyChart.update('active');
-
-                productionChart.data.labels = batchIds;
-                productionChart.data.datasets[0].data = productionRates;
-                productionChart.update('active');
-
-                durationChart.data.labels = batchIds;
-                durationChart.data.datasets[0].data = durations;
-                durationChart.update('active');
-
-                // Update comparison chart
-                comparisonChart.data.labels = batchIds;
-                comparisonChart.data.datasets[0].data = efficiencies;
-                comparisonChart.data.datasets[1].data = productionRates;
-                comparisonChart.update('active');
+                
+                // Store original data
+                originalBatches = batches;
+                allBatches = batches;
 
                 // Load all data for table
                 const dataRes = await fetch('/api/data');
                 if (!dataRes.ok) throw new Error(`HTTP error! status: ${dataRes.status}`);
-                const data = await dataRes.json();
-                allData = (data.data || []).reverse(); // Newest first
+                const tableData = await dataRes.json();
+                originalData = (tableData.data || []).reverse(); // Newest first
+                allData = originalData;
                 
-                filterTable();
+                // Apply filters and update visuals
+                filterData();
+                updateVisuals();
+                
+                // Setup stat card clicks
+                setupStatCardClicks();
+                
+                // Also update stats display for initial unfiltered view
+                updateStatsDisplay(stats);
 
                 // Update last update time
                 document.getElementById('lastUpdate').textContent = 
                     'Last updated: ' + new Date().toLocaleTimeString();
+                
+                // Check ESP32 status after loading data
+                checkESP32Status();
 
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -907,6 +1691,20 @@
                         <small>Make sure you're accessing this page through: <code>http://localhost:5002/</code></small>
                     </div>`;
             }
+        }
+
+        function filterByBatchId(batchId) {
+            // Toggle batch ID in selected list
+            const idx = activeFilters.selectedBatchIds.indexOf(batchId.toString());
+            if (idx > -1) {
+                activeFilters.selectedBatchIds.splice(idx, 1);
+            } else {
+                activeFilters.selectedBatchIds.push(batchId.toString());
+            }
+            
+            updateFilterCount();
+            filterData();
+            updateVisuals();
         }
 
         function exportData() {
@@ -930,6 +1728,16 @@
                 if (res.ok) {
                     const data = await res.json();
                     updateServerStatus('Running', 'success');
+                    
+                    // Store config globally for use in other functions
+                    if (data.config) {
+                        window.serverConfig = data.config;
+                    }
+                    
+                    // Also update ESP32 status
+                    if (data.esp32_last_seen) {
+                        updateESP32Status(data.esp32_last_seen, data.esp32_connection_count, data.esp32_last_batch_id);
+                    }
                 } else {
                     updateServerStatus('Error', 'danger');
                 }
@@ -938,15 +1746,176 @@
             }
         }
 
+        async function checkESP32Status() {
+            try {
+                const res = await fetch('/api/esp32/status');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.last_seen) {
+                        const timeSince = data.time_since_last_seconds;
+                        let statusText = '';
+                        let statusType = 'danger';
+                        
+                        if (timeSince < 300) {
+                            statusText = `Connected (${Math.round(timeSince)}s ago)`;
+                            statusType = 'success';
+                        } else if (timeSince < 3600) {
+                            statusText = `Recent (${Math.round(timeSince/60)}m ago)`;
+                            statusType = 'warning';
+                        } else {
+                            statusText = `Disconnected (${Math.round(timeSince/3600)}h ago)`;
+                            statusType = 'danger';
+                        }
+                        
+                        updateESP32Status(statusText, data.total_connections, data.last_batch_id);
+                    } else {
+                        updateESP32Status('Never connected', 0, null);
+                    }
+                }
+            } catch (error) {
+                updateESP32Status('Status check failed', 0, null);
+            }
+        }
+
+        function updateESP32Status(status, connections, lastBatch) {
+            const statusEl = document.getElementById('esp32Status');
+            let statusText = `ESP32: ${status}`;
+            if (connections > 0) {
+                statusText += ` (${connections} connections)`;
+            }
+            if (lastBatch) {
+                statusText += ` | Last Batch: #${lastBatch}`;
+            }
+            
+            statusEl.textContent = statusText;
+            
+            // Color coding
+            if (status.includes('Connected') || status.includes('Recent')) {
+                statusEl.style.color = status.includes('Connected') ? 'var(--success)' : 'var(--warning)';
+            } else {
+                statusEl.style.color = 'var(--danger)';
+            }
+        }
+
+        async function testESP32Connection() {
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> Testing...';
+            btn.disabled = true;
+            
+            try {
+                // Test server endpoint
+                const testRes = await fetch('/api/test', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({test: true, timestamp: new Date().toISOString()})
+                });
+                
+                if (testRes.ok) {
+                    const testData = await testRes.json();
+                    
+                    // Check ESP32 status
+                    const esp32Res = await fetch('/api/esp32/status');
+                    const esp32Data = await esp32Res.ok ? await esp32Res.json() : null;
+                    
+                    // Show results in modal
+                    showConnectionTestResults(testData, esp32Data);
+                } else {
+                    alert('❌ Server test failed. Check if server is running.');
+                }
+            } catch (error) {
+                alert(`❌ Connection test failed: ${error.message}\n\nMake sure:\n1. Server is running\n2. ESP32 IP is correct\n3. Both devices are on same network`);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function showConnectionTestResults(testData, esp32Data) {
+            const modal = document.getElementById('drillDownModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = '🔌 Connection Test Results';
+            
+            let content = '<div style="margin-top: 20px;">';
+            content += '<h3>Server Status</h3>';
+            content += `<p><strong>Status:</strong> <span style="color: var(--success);">✓ Online</span></p>`;
+            content += `<p><strong>Server Time:</strong> ${testData.server_time}</p>`;
+            content += `<p><strong>Endpoint:</strong> ${testData.endpoint}</p>`;
+            
+            // Add config info if available
+            if (testData.config || (window.serverConfig)) {
+                content += '<hr style="margin: 20px 0;">';
+                content += '<h3>⚙️ Configuration</h3>';
+                const cfg = testData.config || window.serverConfig || {};
+                if (cfg.local_ip) {
+                    content += `<p><strong>Server IP:</strong> ${cfg.local_ip}</p>`;
+                    content += `<p><strong>Data Endpoint:</strong> <code>${cfg.data_endpoint || 'N/A'}</code></p>`;
+                }
+                if (cfg.wifi_ssid) {
+                    content += `<p><strong>WiFi SSID:</strong> ${cfg.wifi_ssid}</p>`;
+                }
+                if (cfg.machine_name) {
+                    content += `<p><strong>Machine Name:</strong> ${cfg.machine_name}</p>`;
+                }
+                content += `<p style="margin-top: 10px; padding: 10px; background: var(--light); border-radius: 5px; font-size: 0.9em;">`;
+                content += `💡 <strong>Tip:</strong> Update <code>config.py</code> to change these settings, then restart the server.`;
+                content += `</p>`;
+            }
+            
+            if (esp32Data) {
+                content += '<hr style="margin: 20px 0;">';
+                content += '<h3>ESP32 Status</h3>';
+                content += `<p><strong>Connection Status:</strong> <span style="color: ${esp32Data.status === 'connected' ? 'var(--success)' : 'var(--danger)'};">${esp32Data.status.toUpperCase()}</span></p>`;
+                
+                if (esp32Data.last_seen) {
+                    const timeSince = esp32Data.time_since_last_seconds;
+                    let timeText = '';
+                    if (timeSince < 60) {
+                        timeText = `${Math.round(timeSince)} seconds ago`;
+                    } else if (timeSince < 3600) {
+                        timeText = `${Math.round(timeSince/60)} minutes ago`;
+                    } else {
+                        timeText = `${Math.round(timeSince/3600)} hours ago`;
+                    }
+                    content += `<p><strong>Last Seen:</strong> ${timeText}</p>`;
+                } else {
+                    content += `<p><strong>Last Seen:</strong> <span style="color: var(--danger);">Never</span></p>`;
+                }
+                
+                content += `<p><strong>Total Connections:</strong> ${esp32Data.total_connections}</p>`;
+                if (esp32Data.last_batch_id) {
+                    content += `<p><strong>Last Batch ID:</strong> #${esp32Data.last_batch_id}</p>`;
+                }
+            }
+            
+            content += '<hr style="margin: 20px 0;">';
+            content += '<h3>📋 Troubleshooting Steps</h3>';
+            content += '<ol style="text-align: left; line-height: 2;">';
+            content += '<li>Check ESP32 is powered on and connected to WiFi</li>';
+            content += '<li>Verify ESP32 code has correct server IP address</li>';
+            content += '<li>Ensure ESP32 and server are on the same network</li>';
+            content += '<li>Check ESP32 Serial Monitor for connection errors</li>';
+            content += '<li>Try pressing the button on ESP32 to send test data</li>';
+            content += '</ol>';
+            
+            content += '</div>';
+            modalBody.innerHTML = content;
+            modal.classList.add('active');
+        }
+
         // Initialize charts, WebSocket, and load data
         initCharts();
         initWebSocket();
         loadData();
         checkServerStatus();
+        checkESP32Status();
 
         // Fallback: Auto-refresh every 30 seconds (WebSocket handles real-time updates)
         setInterval(loadData, 30000);
         setInterval(checkServerStatus, 10000); // Check server status every 10 seconds
+        setInterval(checkESP32Status, 15000); // Check ESP32 status every 15 seconds
     </script>
 </body>
 </html>

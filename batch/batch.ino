@@ -41,12 +41,12 @@ const int DOUBLE_CLICK_MS = 300;
 #define EEPROM_BATCH_NUM_ADDR 0
 
 // WiFi Credentials
-const char* ssid = "AnasAlsayed-2.4";
-const char* password = "1234567890";
+const char* ssid = "Faris";
+const char* password = "Faris2003";
 
 // Flask Server Configuration
 // Update with your computer's IP address (run ipconfig/ifconfig to find it)
-const char* serverIP = "192.168.1.66";  // CHANGE THIS to your computer's IP
+const char* serverIP = "172.20.10.7";  // CHANGE THIS to your computer's IP
 const int serverPort = 5002;
 String serverURL = "";  // Will be constructed in setup()
 

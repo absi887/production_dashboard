@@ -5,18 +5,121 @@ import csv
 import os
 from datetime import datetime
 import json
+import socket
+import re
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configuration from .env file
+SERVER_HOST = os.getenv('SERVER_HOST', '0.0.0.0')
+SERVER_PORT = int(os.getenv('SERVER_PORT', 5002))
+WIFI_SSID = os.getenv('WIFI_SSID', 'YOUR_WIFI')
+WIFI_PASSWORD = os.getenv('WIFI_PASSWORD', '')
+MACHINE_NAME = os.getenv('MACHINE_NAME', 'Wood_Line_1')
+CSV_FILE = os.getenv('CSV_FILE', 'wood_line_data.csv')
+DASHBOARD_TITLE = os.getenv('DASHBOARD_TITLE', 'ESP32 Batch Tracker - Production Dashboard')
+DEBUG_MODE = os.getenv('DEBUG_MODE', 'True').lower() == 'true'
+
+def get_local_ip():
+    """Get local IP address"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        try:
+            hostname = socket.gethostname()
+            return socket.gethostbyname(hostname)
+        except:
+            return "127.0.0.1"
+
+def update_arduino_code():
+    """Update Arduino code with current configuration"""
+    # Try both possible locations
+    arduino_file = Path(__file__).parent / "batch.ino"
+    if not arduino_file.exists():
+        arduino_file = Path(__file__).parent / "batch" / "batch.ino"
+    if not arduino_file.exists():
+        print(f"⚠️  Arduino file not found. Tried: batch.ino and batch/batch.ino")
+        return False
+    
+    server_ip = get_local_ip()
+    
+    try:
+        with open(arduino_file, 'r') as f:
+            content = f.read()
+        
+        # Update server IP
+        content = re.sub(
+            r'const char\* serverIP = "[^"]*";',
+            f'const char* serverIP = "{server_ip}";',
+            content
+        )
+        
+        # Update WiFi SSID
+        content = re.sub(
+            r'const char\* ssid = "[^"]*";',
+            f'const char* ssid = "{WIFI_SSID}";',
+            content
+        )
+        
+        # Update WiFi password
+        content = re.sub(
+            r'const char\* password = "[^"]*";',
+            f'const char* password = "{WIFI_PASSWORD}";',
+            content
+        )
+        
+        # Update machine name
+        content = re.sub(
+            r'String machineName = "[^"]*";',
+            f'String machineName = "{MACHINE_NAME}";',
+            content
+        )
+        
+        # Update server port
+        content = re.sub(
+            r'const int serverPort = \d+;',
+            f'const int serverPort = {SERVER_PORT};',
+            content
+        )
+        
+        with open(arduino_file, 'w') as f:
+            f.write(content)
+        
+        print(f"✓ Updated Arduino code:")
+        print(f"  - Server IP: {server_ip}")
+        print(f"  - WiFi SSID: {WIFI_SSID}")
+        print(f"  - Machine: {MACHINE_NAME}")
+        print(f"  - Port: {SERVER_PORT}")
+        return True
+        
+    except Exception as e:
+        print(f"✗ Error updating Arduino code: {e}")
+        return False
+
+# Update Arduino code on server start
+print("🔧 Updating Arduino configuration...")
+update_arduino_code()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 CORS(app)  # Enable CORS for ESP32 requests
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# The name of your data file
-CSV_FILE = 'wood_line_data.csv'
-
 # Command queue for ESP32 control
 pending_command = None
 command_lock = False
+
+# ESP32 connection tracking
+esp32_last_seen = None
+esp32_connection_count = 0
+esp32_last_batch_id = None
 
 # Initialize the CSV with headers if it doesn't exist
 def init_csv():
@@ -39,23 +142,43 @@ def init_csv():
 
 @app.route('/data', methods=['POST', 'OPTIONS'])
 def receive_data():
+    global esp32_last_seen, esp32_connection_count, esp32_last_batch_id
+    
     # Handle CORS preflight
     if request.method == 'OPTIONS':
         return '', 200
     
     try:
+        # Get client IP for logging
+        client_ip = request.remote_addr
+        print(f"\n{'='*60}")
+        print(f"📡 Incoming request from: {client_ip}")
+        print(f"   Method: {request.method}")
+        print(f"   Headers: {dict(request.headers)}")
+        
         # Get JSON data from ESP32
         data = request.json
         if not data:
-            print("✗ Error: No JSON received")
-            return jsonify({"success": False, "error": "No JSON received"}), 400
+            # Try to get raw data for debugging
+            raw_data = request.get_data(as_text=True)
+            print(f"✗ Error: No JSON received")
+            print(f"   Raw data: {raw_data[:200]}")
+            return jsonify({"success": False, "error": "No JSON received", "received": raw_data[:100]}), 400
         
         event = data.get('event', 'UNKNOWN')
         batch_id = data.get('batch_id', 0)
         
+        # Update ESP32 tracking
+        esp32_last_seen = datetime.now()
+        esp32_connection_count += 1
+        esp32_last_batch_id = batch_id
+        
         print(f"📥 Received {event} for Batch #{batch_id}")
         print(f"   Machine: {data.get('machine', 'N/A')}")
         print(f"   Status: {data.get('status', 'N/A')}")
+        print(f"   Timestamp: {data.get('timestamp', 'N/A')}")
+        print(f"   Total connections: {esp32_connection_count}")
+        print(f"{'='*60}\n")
         
         # Prepare row data (order must match headers exactly)
         row = [
@@ -181,18 +304,111 @@ def server_status():
     try:
         import psutil
         import os
+        import socket
         process = psutil.Process(os.getpid())
+        
+        # Get local IP
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        
+        # Calculate time since last ESP32 contact
+        esp32_status = "never"
+        if esp32_last_seen:
+            time_diff = (datetime.now() - esp32_last_seen).total_seconds()
+            if time_diff < 60:
+                esp32_status = f"{int(time_diff)}s ago"
+            elif time_diff < 3600:
+                esp32_status = f"{int(time_diff/60)}m ago"
+            else:
+                esp32_status = f"{int(time_diff/3600)}h ago"
+        
         return jsonify({
             "status": "running",
             "cpu_percent": process.cpu_percent(interval=0.1),
             "memory_mb": round(process.memory_info().rss / 1024 / 1024, 2),
-            "connections": len(socketio.server.manager.rooms.get('/', {}).get('', {})) if hasattr(socketio.server, 'manager') else 0
+            "connections": len(socketio.server.manager.rooms.get('/', {}).get('', {})) if hasattr(socketio.server, 'manager') else 0,
+            "esp32_last_seen": esp32_status,
+            "esp32_connection_count": esp32_connection_count,
+            "esp32_last_batch_id": esp32_last_batch_id,
+            "csv_file_exists": os.path.exists(CSV_FILE),
+            "csv_file_size": os.path.getsize(CSV_FILE) if os.path.exists(CSV_FILE) else 0,
+            "config": {
+                "server_host": SERVER_HOST,
+                "server_port": SERVER_PORT,
+                "local_ip": local_ip,
+                "data_endpoint": f"http://{local_ip}:{SERVER_PORT}/data",
+                "wifi_ssid": WIFI_SSID,
+                "machine_name": MACHINE_NAME
+            }
         }), 200
-    except:
+    except Exception as e:
         return jsonify({
             "status": "running",
-            "websocket": "enabled"
+            "websocket": "enabled",
+            "error": str(e),
+            "esp32_last_seen": esp32_status if 'esp32_last_seen' in globals() else "never",
+            "esp32_connection_count": esp32_connection_count if 'esp32_connection_count' in globals() else 0
         }), 200
+
+@app.route('/api/test', methods=['GET', 'POST'])
+def test_endpoint():
+    """Test endpoint for ESP32 connectivity"""
+    import socket
+    client_ip = request.remote_addr
+    method = request.method
+    
+    # Get local IP for config
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    
+    response_data = {
+        "success": True,
+        "message": "Server is reachable!",
+        "method": method,
+        "client_ip": client_ip,
+        "server_time": datetime.now().isoformat(),
+        "endpoint": "/api/test",
+        "config": {
+            "server_host": SERVER_HOST,
+            "server_port": SERVER_PORT,
+            "local_ip": local_ip,
+            "data_endpoint": f"http://{local_ip}:{SERVER_PORT}/data",
+            "wifi_ssid": WIFI_SSID,
+            "machine_name": MACHINE_NAME
+        }
+    }
+    
+    if method == 'POST':
+        response_data["received_data"] = request.json if request.json else request.get_data(as_text=True)
+    
+    print(f"✓ Test endpoint accessed by {client_ip} via {method}")
+    return jsonify(response_data), 200
+
+@app.route('/api/esp32/status', methods=['GET'])
+def esp32_status():
+    """Get ESP32 connection status"""
+    global esp32_last_seen, esp32_connection_count, esp32_last_batch_id
+    
+    status = "disconnected"
+    time_since_last = None
+    
+    if esp32_last_seen:
+        time_diff = (datetime.now() - esp32_last_seen).total_seconds()
+        if time_diff < 300:  # 5 minutes
+            status = "connected"
+        elif time_diff < 3600:  # 1 hour
+            status = "recently_connected"
+        else:
+            status = "disconnected"
+        time_since_last = time_diff
+    
+    return jsonify({
+        "status": status,
+        "last_seen": esp32_last_seen.isoformat() if esp32_last_seen else None,
+        "time_since_last_seconds": time_since_last,
+        "total_connections": esp32_connection_count,
+        "last_batch_id": esp32_last_batch_id
+    }), 200
 
 @socketio.on('connect')
 def handle_connect():
@@ -470,18 +686,35 @@ if __name__ == '__main__':
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     
-    print("\n" + "="*50)
+    print("\n" + "="*60)
     print("🚀 ESP32 Batch Tracker Server")
-    print("="*50)
-    print(f"✓ Server running on: http://0.0.0.0:5002")
+    print("="*60)
+    print(f"✓ Server running on: http://{SERVER_HOST}:{SERVER_PORT}")
     print(f"✓ Local IP: {local_ip}")
-    print(f"✓ ESP32 should connect to: http://{local_ip}:5002/data")
-    print(f"✓ Dashboard available at: http://{local_ip}:5002/")
-    print(f"✓ CSV file: {CSV_FILE}")
-    print("="*50)
-    print("Waiting for ESP32 data...\n")
+    print(f"\n📡 ESP32 Connection Endpoints:")
+    print(f"   Data endpoint:  http://{local_ip}:{SERVER_PORT}/data")
+    print(f"   Test endpoint:  http://{local_ip}:{SERVER_PORT}/api/test")
+    print(f"   Command check:  http://{local_ip}:{SERVER_PORT}/api/command")
+    print(f"\n🌐 Dashboard:")
+    print(f"   URL: http://{local_ip}:{SERVER_PORT}/")
+    print(f"   Or:  http://localhost:{SERVER_PORT}/")
+    print(f"\n📊 API Endpoints:")
+    print(f"   Status: http://{local_ip}:{SERVER_PORT}/api/server/status")
+    print(f"   ESP32:  http://{local_ip}:{SERVER_PORT}/api/esp32/status")
+    print(f"\n💾 Data:")
+    print(f"   CSV file: {CSV_FILE}")
+    print(f"   Exists: {'Yes' if os.path.exists(CSV_FILE) else 'No'}")
+    print(f"\n⚙️  Configuration (.env file):")
+    print(f"   WiFi SSID: {WIFI_SSID}")
+    print(f"   Machine: {MACHINE_NAME}")
+    print(f"   Server IP (ESP32): {local_ip}")
+    print("="*60)
+    print("\n✅ Arduino code has been automatically updated!")
+    print(f"   ESP32 will connect to: {local_ip}:{SERVER_PORT}")
+    print("\n📡 Waiting for ESP32 data...\n")
     
+    # Use config values for server host and port
     # 0.0.0.0 allows connections from external devices (like your ESP32)
     # Use socketio.run instead of app.run for WebSocket support
-    socketio.run(app, host='0.0.0.0', port=5002, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host=SERVER_HOST, port=SERVER_PORT, debug=DEBUG_MODE, allow_unsafe_werkzeug=True)
     
