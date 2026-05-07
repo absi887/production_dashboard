@@ -1,0 +1,689 @@
+timestamp,line,batch_id,event,status,machine,active_runtime_s,active_runtime_formatted,total_elapsed_s,total_elapsed_formatted,batch_duration_s,batch_duration_formatted,total_pause_s,total_pause_formatted,pause_count,avg_pause_duration_s,efficiency_percent,production_rate_per_hour,wifi_rssi,wifi_quality
+2026-05-05 17:38:49,door,8,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-73,Poor
+2026-05-05 17:39:05,frame,12,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-72,Poor
+2026-05-05 17:39:22,arch,5,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-72,Poor
+2026-05-05 17:39:59,door,9,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-74,Poor
+2026-05-05 17:39:59,frame,13,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-73,Poor
+2026-05-05 17:40:18,frame,13,END,STOPPED,Wood_Line_1,19,,19,,,,0,,0,,100.0,189.47,-75,Poor
+2026-05-05 17:40:18,frame,13,END,STOPPED,Wood_Line_1,19,,19,,,,0,,0,,100.0,189.47,-75,Poor
+2026-05-05 17:40:59,door,9,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-75,Poor
+2026-05-05 17:40:59,door,9,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-75,Poor
+2026-05-05 17:41:59,door,9,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-73,Poor
+2026-05-05 17:41:59,door,9,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-73,Poor
+2026-05-05 17:42:59,door,9,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-73,Poor
+2026-05-05 17:42:59,door,9,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-73,Poor
+2026-05-05 17:43:59,door,9,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-74,Poor
+2026-05-05 17:43:59,door,9,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-74,Poor
+2026-05-05 17:44:59,door,9,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor
+2026-05-05 17:45:24,frame,14,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor
+2026-05-05 17:45:24,frame,14,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor
+2026-05-05 17:45:34,frame,14,END,STOPPED,Wood_Line_1,9,,9,,,,0,,0,,100.0,400.0,-76,Poor
+2026-05-05 17:45:34,frame,14,END,STOPPED,Wood_Line_1,9,,9,,,,0,,0,,100.0,400.0,-76,Poor
+2026-05-05 17:45:58,frame,15,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-78,Poor
+2026-05-05 17:45:58,frame,15,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-78,Poor
+2026-05-05 17:45:59,door,9,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-80,Poor
+2026-05-05 17:45:59,door,9,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-80,Poor
+2026-05-05 17:46:58,frame,15,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor
+2026-05-05 17:46:58,frame,15,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor
+2026-05-05 17:46:59,door,9,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-75,Poor
+2026-05-05 17:46:59,door,9,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-75,Poor
+2026-05-05 17:47:58,frame,15,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-73,Poor
+2026-05-05 17:47:58,frame,15,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-73,Poor
+2026-05-05 17:47:59,door,9,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-73,Poor
+2026-05-05 17:47:59,door,9,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-73,Poor
+2026-05-05 17:48:58,frame,15,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor
+2026-05-05 17:48:58,frame,15,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor
+2026-05-05 17:48:59,door,9,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-75,Poor
+2026-05-05 17:48:59,door,9,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-75,Poor
+2026-05-05 17:49:30,frame,15,END,STOPPED,Wood_Line_1,211,,211,,,,0,,0,,100.0,17.06,-72,Poor
+2026-05-05 17:49:30,frame,15,END,STOPPED,Wood_Line_1,211,,211,,,,0,,0,,100.0,17.06,-72,Poor
+2026-05-05 17:49:59,door,9,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-74,Poor
+2026-05-05 17:49:59,door,9,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-74,Poor
+2026-05-05 17:57:34,door,9,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-76,Poor
+2026-05-05 17:57:36,frame,15,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-73,Poor
+2026-05-05 17:57:39,arch,5,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-75,Poor
+2026-05-05 17:58:28,door,10,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor
+2026-05-05 17:59:28,door,10,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor
+2026-05-05 17:59:28,door,10,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor
+2026-05-05 18:00:28,door,10,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-77,Poor
+2026-05-05 18:00:28,door,10,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-77,Poor
+2026-05-05 18:01:28,door,10,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-73,Poor
+2026-05-05 18:01:28,door,10,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-73,Poor
+2026-05-05 18:02:28,door,10,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-76,Poor
+2026-05-05 18:02:28,door,10,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-76,Poor
+2026-05-05 18:03:28,door,10,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor
+2026-05-05 18:03:28,door,10,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor
+2026-05-05 18:04:28,door,10,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-75,Poor
+2026-05-05 18:04:28,door,10,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-75,Poor
+2026-05-05 18:05:28,door,10,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-73,Poor
+2026-05-05 18:05:28,door,10,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-73,Poor
+2026-05-05 18:06:28,door,10,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-77,Poor
+2026-05-05 18:06:28,door,10,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-77,Poor
+2026-05-05 18:07:28,door,10,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-76,Poor
+2026-05-05 18:07:28,door,10,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-76,Poor
+2026-05-05 18:07:52,door,10,END,STOPPED,Wood_Line_1,563,,563,,,,0,,0,,100.0,6.39,-77,Poor
+2026-05-05 18:07:52,door,10,END,STOPPED,Wood_Line_1,563,,563,,,,0,,0,,100.0,6.39,-77,Poor
+2026-05-05 18:07:58,door,11,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor
+2026-05-05 18:07:58,door,11,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor
+2026-05-05 18:08:58,door,11,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-80,Poor
+2026-05-05 18:08:58,door,11,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-80,Poor
+2026-05-05 18:09:58,door,11,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-81,Poor
+2026-05-05 18:09:58,door,11,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-81,Poor
+2026-05-05 18:10:12,frame,16,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-82,Poor
+2026-05-05 18:10:12,frame,16,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-82,Poor
+2026-05-05 18:10:58,door,11,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-81,Poor
+2026-05-05 18:10:58,door,11,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-81,Poor
+2026-05-05 18:11:12,frame,16,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-81,Poor
+2026-05-05 18:11:12,frame,16,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-81,Poor
+2026-05-05 18:11:58,door,11,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-80,Poor
+2026-05-05 18:11:58,door,11,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-80,Poor
+2026-05-05 18:12:12,frame,16,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-79,Poor
+2026-05-05 18:12:12,frame,16,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-79,Poor
+2026-05-05 18:12:58,door,11,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-81,Poor,Arduino
+2026-05-05 18:12:58,door,11,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-81,Poor,Arduino
+2026-05-05 18:13:12,frame,16,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-80,Poor,Arduino
+2026-05-05 18:13:12,frame,16,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-80,Poor,Arduino
+2026-05-05 18:13:58,door,11,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-79,Poor,Arduino
+2026-05-05 18:13:58,door,11,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-79,Poor,Arduino
+2026-05-05 18:14:12,frame,16,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-78,Poor,Arduino
+2026-05-05 18:14:12,frame,16,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-78,Poor,Arduino
+2026-05-05 18:14:58,door,11,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-76,Poor,Arduino
+2026-05-05 18:14:58,door,11,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-76,Poor,Arduino
+2026-05-05 18:15:12,frame,16,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor,Arduino
+2026-05-05 18:15:12,frame,16,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor,Arduino
+2026-05-05 18:15:58,door,11,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-81,Poor,Arduino
+2026-05-05 18:15:58,door,11,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-81,Poor,Arduino
+2026-05-05 18:16:12,frame,16,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-81,Poor,Arduino
+2026-05-05 18:16:12,frame,16,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-81,Poor,Arduino
+2026-05-05T21:16:36.171657,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 18:16:58,door,11,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-82,Poor,Arduino
+2026-05-05 18:16:58,door,11,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-82,Poor,Arduino
+2026-05-05 18:17:12,frame,16,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-81,Poor,Arduino
+2026-05-05 18:17:12,frame,16,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-81,Poor,Arduino
+2026-05-05 18:17:58,door,11,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-81,Poor,Arduino
+2026-05-05 18:17:58,door,11,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-81,Poor,Arduino
+2026-05-05T21:18:11.440035,frame,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 18:18:12,frame,16,END,STOPPED,Wood_Line_1,479,,479,,,,0,,0,,100.0,7.52,-81,Poor,Arduino
+2026-05-05 18:18:12,frame,16,END,STOPPED,Wood_Line_1,479,,479,,,,0,,0,,100.0,7.52,-81,Poor,Arduino
+2026-05-05T21:18:16.125565,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 18:18:16,door,11,END,STOPPED,Wood_Line_1,618,,618,,,,0,,0,,100.0,5.83,-82,Poor,Arduino
+2026-05-05 18:18:16,door,11,END,STOPPED,Wood_Line_1,618,,618,,,,0,,0,,100.0,5.83,-82,Poor,Arduino
+2026-05-05T21:42:47.170117,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05T21:42:48.768245,door,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05T21:42:56.925207,door,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05T21:43:13.136066,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05T21:43:54.868945,door,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05T21:44:04.994960,door,,ADVANCE,FINISHED,,,,,,,,,,,,,,,,Website
+2026-05-05T21:45:22.478385,door,JOB-915375,START,,,,,,,,,,,,,,,,,Website Auto-Deploy
+2026-05-05 18:45:24,door,12,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05 18:45:24,door,12,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05 18:46:24,door,12,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05 18:46:24,door,12,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05T21:47:19.898641,door,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05 18:47:20,door,12,PAUSE,PAUSED,Wood_Line_1,116,,116,,,,0,,1,,100.0,31.03,-75,Poor,Arduino
+2026-05-05 18:47:20,door,12,PAUSE,PAUSED,Wood_Line_1,116,,116,,,,0,,1,,100.0,31.03,-75,Poor,Arduino
+2026-05-05T21:47:29.684373,door,,ADVANCE,FINISHED,Wood_Line_1,,,,,,,,,,,,,,,Website
+2026-05-05T21:47:34.979573,frame,,ADVANCE,READY,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T21:47:35.693217,frame,,ADVANCE,READY,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T21:47:36.589802,frame,,ADVANCE,READY,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T21:47:36.973599,frame,,ADVANCE,READY,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T21:47:37.800243,frame,,ADVANCE,READY,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T21:50:58.208710,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 18:51:00,frame,17,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 18:51:00,frame,17,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T21:51:05.881603,frame,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05 18:51:06,frame,17,PAUSE,PAUSED,Wood_Line_1,5,,5,,,,0,,1,,100.0,720.0,-76,Poor,Arduino
+2026-05-05 18:51:06,frame,17,PAUSE,PAUSED,Wood_Line_1,5,,5,,,,0,,1,,100.0,720.0,-76,Poor,Arduino
+2026-05-05T21:51:09.562767,frame,,COMMAND,RESUME,,,,,,,,,,,,,,,,Website
+2026-05-05 18:51:10,frame,17,RESUME,RUNNING,Wood_Line_1,5,,10,,,,4,,1,,59.59,720.0,-77,Poor,Arduino
+2026-05-05 18:51:10,frame,17,RESUME,RUNNING,Wood_Line_1,5,,10,,,,4,,1,,59.59,720.0,-77,Poor,Arduino
+2026-05-05T21:51:14.862089,frame,,ADVANCE,FINISHED,Wood_Line_1,,,,,,,,,,,,,,,Website
+2026-05-05T21:51:17.982730,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 18:51:18,arch,6,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 18:51:18,arch,6,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T21:51:53.867069,arch,,ADVANCE,FINISHED,Wood_Line_1,,,,,,,,,,,,,,,Website
+2026-05-05 18:52:00,frame,17,STATUS,RUNNING,Wood_Line_1,55,,60,,,,4,,1,,93.24,65.45,-80,Poor,Arduino
+2026-05-05 18:52:00,frame,17,STATUS,RUNNING,Wood_Line_1,55,,60,,,,4,,1,,93.24,65.45,-80,Poor,Arduino
+2026-05-05 18:52:18,arch,6,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-78,Poor,Arduino
+2026-05-05 18:52:18,arch,6,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-78,Poor,Arduino
+2026-05-05 18:53:00,frame,17,STATUS,RUNNING,Wood_Line_1,115,,120,,,,4,,1,,96.62,31.3,-78,Poor,Arduino
+2026-05-05 18:53:00,frame,17,STATUS,RUNNING,Wood_Line_1,115,,120,,,,4,,1,,96.62,31.3,-78,Poor,Arduino
+2026-05-05 18:53:18,arch,6,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-79,Poor,Arduino
+2026-05-05 18:53:18,arch,6,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-79,Poor,Arduino
+2026-05-05T21:53:40.912421,frame,,ADVANCE,FINISHED,Wood_Line_1,,,,,,,,,,,,,,,Website
+2026-05-05T21:53:43.520192,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T21:53:48.702049,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T21:53:51.164818,arch,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 18:53:52,arch,6,END,STOPPED,Wood_Line_1,153,,153,,,,0,,0,,100.0,23.53,-80,Poor,Arduino
+2026-05-05 18:53:52,arch,6,END,STOPPED,Wood_Line_1,153,,153,,,,0,,0,,100.0,23.53,-80,Poor,Arduino
+2026-05-05 18:54:00,frame,17,STATUS,RUNNING,Wood_Line_1,175,,180,,,,4,,1,,97.75,20.57,-81,Poor,Arduino
+2026-05-05 18:54:00,frame,17,STATUS,RUNNING,Wood_Line_1,175,,180,,,,4,,1,,97.75,20.57,-81,Poor,Arduino
+2026-05-05 18:55:00,frame,17,STATUS,RUNNING,Wood_Line_1,235,,240,,,,4,,1,,98.31,15.32,-77,Poor,Arduino
+2026-05-05 18:55:00,frame,17,STATUS,RUNNING,Wood_Line_1,235,,240,,,,4,,1,,98.31,15.32,-77,Poor,Arduino
+2026-05-05 18:56:00,frame,17,STATUS,RUNNING,Wood_Line_1,295,,300,,,,4,,1,,98.65,12.2,-77,Poor,Arduino
+2026-05-05 18:56:00,frame,17,STATUS,RUNNING,Wood_Line_1,295,,300,,,,4,,1,,98.65,12.2,-77,Poor,Arduino
+2026-05-05 18:57:00,frame,17,STATUS,RUNNING,Wood_Line_1,355,,360,,,,4,,1,,98.87,10.14,-77,Poor,Arduino
+2026-05-05 18:57:00,frame,17,STATUS,RUNNING,Wood_Line_1,355,,360,,,,4,,1,,98.87,10.14,-77,Poor,Arduino
+2026-05-05 18:58:00,frame,17,STATUS,RUNNING,Wood_Line_1,415,,420,,,,4,,1,,99.03,8.67,-79,Poor,Arduino
+2026-05-05 18:58:00,frame,17,STATUS,RUNNING,Wood_Line_1,415,,420,,,,4,,1,,99.03,8.67,-79,Poor,Arduino
+2026-05-05T21:58:24.777401,frame,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 18:58:26,frame,17,END,STOPPED,Wood_Line_1,441,,445,,,,4,,1,,99.09,8.09,-77,Poor,Arduino
+2026-05-05 18:58:26,frame,17,END,STOPPED,Wood_Line_1,441,,445,,,,4,,1,,99.09,8.09,-77,Poor,Arduino
+2026-05-05T22:05:22.710373,door,JOB-787897,START,,,,,,,,,,,,,,,,,Website Auto-Deploy
+2026-05-05T22:05:27.151859,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:05:28,door,12,END,STOPPED,Wood_Line_1,116,,1204,,,,1088,,1,,9.65,2.99,-78,Poor,Arduino
+2026-05-05 19:05:28,door,12,END,FINISHED,Wood_Line_1,116,,1204,,,,1088,,1,,9.65,2.99,-78,Poor,Arduino
+2026-05-05T22:05:49.749086,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:05:50,frame,18,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05 19:05:50,frame,18,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05T22:05:56.759050,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:03.037757,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:06.109734,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:06.727351,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:07.414147,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:08.423301,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:10.931031,frame,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05 19:06:12,frame,18,PAUSE,PAUSED,Wood_Line_1,22,,22,,,,0,,1,,100.0,163.64,-77,Poor,Arduino
+2026-05-05 19:06:12,frame,18,PAUSE,PAUSED,Wood_Line_1,22,,22,,,,0,,1,,100.0,163.64,-77,Poor,Arduino
+2026-05-05T22:06:17.447244,frame,,COMMAND,RESUME,,,,,,,,,,,,,,,,Website
+2026-05-05 19:06:18,frame,18,RESUME,RUNNING,Wood_Line_1,22,,27,,,,5,,1,,78.64,163.64,-77,Poor,Arduino
+2026-05-05 19:06:18,frame,18,RESUME,RUNNING,Wood_Line_1,22,,27,,,,5,,1,,78.64,163.64,-77,Poor,Arduino
+2026-05-05T22:06:20.673595,frame,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05T22:06:22.180435,frame,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:06:22,frame,18,END,STOPPED,Wood_Line_1,26,,31,,,,5,,1,,81.31,116.13,-78,Poor,Arduino
+2026-05-05 19:06:22,frame,18,END,FINISHED,Wood_Line_1,26,,31,,,,5,,1,,81.31,116.13,-78,Poor,Arduino
+2026-05-05T22:06:26.780016,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:06:28,arch,7,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:06:28,arch,7,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:06:19,door,12,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-79,Poor,Arduino
+2026-05-05 19:06:19,frame,18,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-78,Poor,Arduino
+2026-05-05 19:06:19,arch,7,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-77,Poor,Arduino
+2026-05-05T22:06:58.008726,arch,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05T22:08:00.409348,arch,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:06.032859,door,JOB-958072,START,,,,,,,,,,,,,,,,,Website Auto-Deploy
+2026-05-05 19:09:06,door,13,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:09:06,door,13,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T22:09:10.439942,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:11.123294,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:11.692171,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:12.266093,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:12.937595,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:13.497055,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:14.172962,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:14.796241,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:15.392532,door,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:18.332792,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:09:20,frame,19,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05 19:09:20,frame,19,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05T22:09:22.984751,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:34.199816,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:34.630943,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:35.219440,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:09:35.785149,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05 19:10:06,door,13,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:10:06,door,13,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05T22:10:08.020392,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:09.172928,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:09.620025,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:10.161571,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:11.264375,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:11.845190,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:12.059603,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:12.241397,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:12.639146,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:12.642190,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:12.815236,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:12.996900,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:13.200979,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:13.376648,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:13.570606,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:14.007632,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:14.685680,frame,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:10:16,frame,19,END,STOPPED,Wood_Line_1,55,,55,,,,0,,0,,100.0,65.45,-76,Poor,Arduino
+2026-05-05 19:10:16,frame,19,END,FINISHED,Wood_Line_1,55,,55,,,,0,,0,,100.0,65.45,-76,Poor,Arduino
+2026-05-05T22:10:56.057520,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:10:56,arch,8,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:10:56,arch,8,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T22:10:57.488944,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:58.097603,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:58.482556,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:58.745030,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:59.025623,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:59.279398,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:10:59.760997,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:04.222257,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:04.795607,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:05.315709,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:05.622839,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:06.093295,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:06.095718,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:06.330651,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:06.578769,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:06.810288,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05 19:11:06,door,13,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:11:06,door,13,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05T22:11:07.013304,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:07.472582,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:07.572413,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:07.782022,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:07.981463,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:08.183771,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:11:09.301767,arch,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:11:10,arch,8,END,STOPPED,Wood_Line_1,13,,13,,,,0,,0,,100.0,276.92,-75,Poor,Arduino
+2026-05-05 19:11:10,arch,8,END,FINISHED,Wood_Line_1,13,,13,,,,0,,0,,100.0,276.92,-75,Poor,Arduino
+2026-05-05T22:11:12.852188,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:11:14,door,13,END,FINISHED,Wood_Line_1,127,,127,,,,0,,0,,100.0,28.35,-78,Poor,Arduino
+2026-05-05 19:11:14,door,13,END,FINISHED,Wood_Line_1,127,,127,,,,0,,0,,100.0,28.35,-78,Poor,Arduino
+2026-05-05T22:15:25.310201,door,JOB-571531,START,,,,,,,,,,,,,,,,,Website Auto-Deploy
+2026-05-05 19:15:26,door,14,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:15:26,door,14,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T22:15:37.647923,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:38.302833,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:38.831024,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:39.361949,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:39.851556,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:40.599457,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:41.834576,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:42.463620,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:43.195944,door,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:46.204730,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:15:46,frame,20,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-74,Poor,Arduino
+2026-05-05 19:15:46,frame,20,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-74,Poor,Arduino
+2026-05-05T22:15:48.328179,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:49.062314,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:49.827100,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:50.634499,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:50.899243,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:51.383507,frame,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:51.956540,frame,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:52.524673,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:53.081318,frame,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:53.494953,frame,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:54.029447,frame,,ADVANCE,RUNNING,Spindle Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:54.567447,frame,,ADVANCE,RUNNING,Sliding Table Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:55.133763,frame,,ADVANCE,RUNNING,Frame Tongue,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:55.710541,frame,,ADVANCE,RUNNING,CNC 5,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:56.330676,frame,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:57.067421,frame,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:15:57.788771,frame,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:00.347292,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:01.461867,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:16:02,arch,9,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05 19:16:02,arch,9,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05T22:16:03.694185,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:04.454071,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:04.736369,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:05.367082,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:05.884139,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:06.127823,arch,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:06.674576,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:07.310785,arch,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:07.841540,arch,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:16:08.720187,arch,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05 19:16:26,door,14,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:16:26,door,14,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:16:46,frame,20,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:16:46,frame,20,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:17:02,arch,9,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:17:02,arch,9,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:17:26,door,14,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-77,Poor,Arduino
+2026-05-05 19:17:26,door,14,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-77,Poor,Arduino
+2026-05-05 19:17:46,frame,20,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:17:46,frame,20,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:18:02,arch,9,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-75,Poor,Arduino
+2026-05-05 19:18:02,arch,9,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-75,Poor,Arduino
+2026-05-05 19:18:26,door,14,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-74,Poor,Arduino
+2026-05-05 19:18:26,door,14,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-74,Poor,Arduino
+2026-05-05 19:18:46,frame,20,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor,Arduino
+2026-05-05 19:18:46,frame,20,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor,Arduino
+2026-05-05 19:19:02,arch,9,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor,Arduino
+2026-05-05 19:19:02,arch,9,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor,Arduino
+2026-05-05 19:19:26,door,14,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-76,Poor,Arduino
+2026-05-05 19:19:26,door,14,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-76,Poor,Arduino
+2026-05-05 19:19:46,frame,20,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-78,Poor,Arduino
+2026-05-05 19:19:46,frame,20,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-78,Poor,Arduino
+2026-05-05 19:20:02,arch,9,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:20:02,arch,9,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:20:26,door,14,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor,Arduino
+2026-05-05 19:20:26,door,14,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-76,Poor,Arduino
+2026-05-05 19:20:46,frame,20,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-75,Poor,Arduino
+2026-05-05 19:20:46,frame,20,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-75,Poor,Arduino
+2026-05-05 19:21:02,arch,9,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-74,Poor,Arduino
+2026-05-05 19:21:02,arch,9,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-74,Poor,Arduino
+2026-05-05 19:21:26,door,14,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-74,Poor,Arduino
+2026-05-05 19:21:26,door,14,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-74,Poor,Arduino
+2026-05-05 19:21:46,frame,20,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-73,Poor,Arduino
+2026-05-05 19:21:46,frame,20,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-73,Poor,Arduino
+2026-05-05T22:22:02.433678,door,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05 19:22:02,door,14,PAUSE,PAUSED,Wood_Line_1,395,,395,,,,0,,1,,100.0,9.11,-72,Poor,Arduino
+2026-05-05 19:22:02,door,14,PAUSE,PAUSED,Wood_Line_1,395,,395,,,,0,,1,,100.0,9.11,-72,Poor,Arduino
+2026-05-05 19:22:02,arch,9,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-72,Poor,Arduino
+2026-05-05 19:22:02,arch,9,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-72,Poor,Arduino
+2026-05-05T22:22:03.827157,door,,COMMAND,RESUME,,,,,,,,,,,,,,,,Website
+2026-05-05 19:22:04,door,14,RESUME,RUNNING,Wood_Line_1,395,,397,,,,1,,1,,99.55,9.11,-73,Poor,Arduino
+2026-05-05 19:22:04,door,14,RESUME,RUNNING,Wood_Line_1,395,,397,,,,1,,1,,99.55,9.11,-73,Poor,Arduino
+2026-05-05 19:22:26,door,14,STATUS,RUNNING,Wood_Line_1,418,,420,,,,1,,1,,99.57,8.61,-72,Poor,Arduino
+2026-05-05 19:22:26,door,14,STATUS,RUNNING,Wood_Line_1,418,,420,,,,1,,1,,99.57,8.61,-72,Poor,Arduino
+2026-05-05 19:22:46,frame,20,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-73,Poor,Arduino
+2026-05-05 19:22:46,frame,20,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-73,Poor,Arduino
+2026-05-05 19:23:02,arch,9,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-73,Poor,Arduino
+2026-05-05 19:23:02,arch,9,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-73,Poor,Arduino
+2026-05-05 19:23:26,door,14,STATUS,RUNNING,Wood_Line_1,478,,480,,,,1,,1,,99.63,7.53,-74,Poor,Arduino
+2026-05-05 19:23:26,door,14,STATUS,RUNNING,Wood_Line_1,478,,480,,,,1,,1,,99.63,7.53,-74,Poor,Arduino
+2026-05-05 19:23:46,frame,20,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-75,Poor,Arduino
+2026-05-05 19:23:46,frame,20,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-75,Poor,Arduino
+2026-05-05 19:24:02,arch,9,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-75,Poor,Arduino
+2026-05-05 19:24:02,arch,9,STATUS,RUNNING,Wood_Line_1,480,,480,,,,0,,0,,100.0,7.5,-75,Poor,Arduino
+2026-05-05 19:24:26,door,14,STATUS,RUNNING,Wood_Line_1,538,,540,,,,1,,1,,99.67,6.69,-74,Poor,Arduino
+2026-05-05 19:24:26,door,14,STATUS,RUNNING,Wood_Line_1,538,,540,,,,1,,1,,99.67,6.69,-74,Poor,Arduino
+2026-05-05 19:24:46,frame,20,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-72,Poor,Arduino
+2026-05-05 19:24:46,frame,20,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-72,Poor,Arduino
+2026-05-05 19:25:02,arch,9,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-72,Poor,Arduino
+2026-05-05 19:25:02,arch,9,STATUS,RUNNING,Wood_Line_1,540,,540,,,,0,,0,,100.0,6.67,-72,Poor,Arduino
+2026-05-05 19:25:26,door,14,STATUS,RUNNING,Wood_Line_1,598,,600,,,,1,,1,,99.7,6.02,-76,Poor,Arduino
+2026-05-05 19:25:26,door,14,STATUS,RUNNING,Wood_Line_1,598,,600,,,,1,,1,,99.7,6.02,-76,Poor,Arduino
+2026-05-05 19:25:46,frame,20,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-76,Poor,Arduino
+2026-05-05 19:25:46,frame,20,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-76,Poor,Arduino
+2026-05-05 19:26:02,arch,9,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-74,Poor,Arduino
+2026-05-05 19:26:02,arch,9,STATUS,RUNNING,Wood_Line_1,600,,600,,,,0,,0,,100.0,6.0,-74,Poor,Arduino
+2026-05-05 19:26:26,door,14,STATUS,RUNNING,Wood_Line_1,658,,660,,,,1,,1,,99.73,5.47,-76,Poor,Arduino
+2026-05-05 19:26:26,door,14,STATUS,RUNNING,Wood_Line_1,658,,660,,,,1,,1,,99.73,5.47,-76,Poor,Arduino
+2026-05-05 19:26:46,frame,20,STATUS,RUNNING,Wood_Line_1,660,,660,,,,0,,0,,100.0,5.45,-75,Poor,Arduino
+2026-05-05 19:26:46,frame,20,STATUS,RUNNING,Wood_Line_1,660,,660,,,,0,,0,,100.0,5.45,-75,Poor,Arduino
+2026-05-05 19:27:02,arch,9,STATUS,RUNNING,Wood_Line_1,660,,660,,,,0,,0,,100.0,5.45,-76,Poor,Arduino
+2026-05-05 19:27:02,arch,9,STATUS,RUNNING,Wood_Line_1,660,,660,,,,0,,0,,100.0,5.45,-76,Poor,Arduino
+2026-05-05 19:27:26,door,14,STATUS,RUNNING,Wood_Line_1,718,,720,,,,1,,1,,99.75,5.01,-75,Poor,Arduino
+2026-05-05 19:27:26,door,14,STATUS,RUNNING,Wood_Line_1,718,,720,,,,1,,1,,99.75,5.01,-75,Poor,Arduino
+2026-05-05 19:27:46,frame,20,STATUS,RUNNING,Wood_Line_1,720,,720,,,,0,,0,,100.0,5.0,-77,Poor,Arduino
+2026-05-05 19:27:46,frame,20,STATUS,RUNNING,Wood_Line_1,720,,720,,,,0,,0,,100.0,5.0,-77,Poor,Arduino
+2026-05-05 19:28:02,arch,9,STATUS,RUNNING,Wood_Line_1,720,,720,,,,0,,0,,100.0,5.0,-76,Poor,Arduino
+2026-05-05 19:28:02,arch,9,STATUS,RUNNING,Wood_Line_1,720,,720,,,,0,,0,,100.0,5.0,-76,Poor,Arduino
+2026-05-05 19:28:26,door,14,STATUS,RUNNING,Wood_Line_1,778,,780,,,,1,,1,,99.77,4.63,-73,Poor,Arduino
+2026-05-05 19:28:26,door,14,STATUS,RUNNING,Wood_Line_1,778,,780,,,,1,,1,,99.77,4.63,-73,Poor,Arduino
+2026-05-05 19:28:46,frame,20,STATUS,RUNNING,Wood_Line_1,780,,780,,,,0,,0,,100.0,4.62,-75,Poor,Arduino
+2026-05-05 19:28:46,frame,20,STATUS,RUNNING,Wood_Line_1,780,,780,,,,0,,0,,100.0,4.62,-75,Poor,Arduino
+2026-05-05 19:29:04,arch,9,STATUS,RUNNING,Wood_Line_1,781,,781,,,,0,,0,,100.0,4.61,-73,Poor,Arduino
+2026-05-05 19:29:04,arch,9,STATUS,RUNNING,Wood_Line_1,781,,781,,,,0,,0,,100.0,4.61,-73,Poor,Arduino
+2026-05-05 19:29:26,door,14,STATUS,RUNNING,Wood_Line_1,838,,840,,,,1,,1,,99.79,4.3,-73,Poor,Arduino
+2026-05-05 19:29:26,door,14,STATUS,RUNNING,Wood_Line_1,838,,840,,,,1,,1,,99.79,4.3,-73,Poor,Arduino
+2026-05-05 19:29:46,frame,20,STATUS,RUNNING,Wood_Line_1,840,,840,,,,0,,0,,100.0,4.29,-73,Poor,Arduino
+2026-05-05 19:29:46,frame,20,STATUS,RUNNING,Wood_Line_1,840,,840,,,,0,,0,,100.0,4.29,-73,Poor,Arduino
+2026-05-05 19:30:04,arch,9,STATUS,RUNNING,Wood_Line_1,841,,841,,,,0,,0,,100.0,4.28,-71,Poor,Arduino
+2026-05-05 19:30:04,arch,9,STATUS,RUNNING,Wood_Line_1,841,,841,,,,0,,0,,100.0,4.28,-71,Poor,Arduino
+2026-05-05 19:30:26,door,14,STATUS,RUNNING,Wood_Line_1,898,,900,,,,1,,1,,99.8,4.01,-76,Poor,Arduino
+2026-05-05 19:30:26,door,14,STATUS,RUNNING,Wood_Line_1,898,,900,,,,1,,1,,99.8,4.01,-76,Poor,Arduino
+2026-05-05 19:30:46,frame,20,STATUS,RUNNING,Wood_Line_1,900,,900,,,,0,,0,,100.0,4.0,-76,Poor,Arduino
+2026-05-05 19:30:46,frame,20,STATUS,RUNNING,Wood_Line_1,900,,900,,,,0,,0,,100.0,4.0,-76,Poor,Arduino
+2026-05-05 19:31:04,arch,9,STATUS,RUNNING,Wood_Line_1,901,,901,,,,0,,0,,100.0,4.0,-71,Poor,Arduino
+2026-05-05 19:31:04,arch,9,STATUS,RUNNING,Wood_Line_1,901,,901,,,,0,,0,,100.0,4.0,-71,Poor,Arduino
+2026-05-05T22:31:14.888989,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:31:16,door,14,END,FINISHED,Wood_Line_1,948,,949,,,,1,,1,,99.81,3.79,-75,Poor,Arduino
+2026-05-05 19:31:16,door,14,END,FINISHED,Wood_Line_1,948,,949,,,,1,,1,,99.81,3.79,-75,Poor,Arduino
+2026-05-05T22:31:27.785039,frame,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:31:28,frame,20,END,FINISHED,Wood_Line_1,942,,942,,,,0,,0,,100.0,3.82,-76,Poor,Arduino
+2026-05-05 19:31:28,frame,20,END,FINISHED,Wood_Line_1,942,,942,,,,0,,0,,100.0,3.82,-76,Poor,Arduino
+2026-05-05T22:31:30.379529,arch,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:31:30,arch,9,END,FINISHED,Wood_Line_1,928,,928,,,,0,,0,,100.0,3.88,-74,Poor,Arduino
+2026-05-05 19:31:30,arch,9,END,FINISHED,Wood_Line_1,928,,928,,,,0,,0,,100.0,3.88,-74,Poor,Arduino
+2026-05-05T22:31:39.323950,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:31:40,door,15,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05 19:31:40,door,15,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05T22:31:46.186896,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:47.873579,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:49.076255,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:50.344495,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:51.003716,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:51.573419,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:52.110386,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:52.832040,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:31:54.510928,door,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:20.487477,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:32:20,frame,21,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:32:20,frame,21,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T22:32:25.771653,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:26.522802,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:26.811980,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:27.209800,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:27.470664,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:27.762967,frame,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:27.978408,frame,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:28.178812,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:28.378664,frame,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:28.704749,frame,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:28.761681,frame,,ADVANCE,RUNNING,Spindle Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:28.946992,frame,,ADVANCE,RUNNING,Sliding Table Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:29.380479,frame,,ADVANCE,RUNNING,Frame Tongue,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:29.910815,frame,,ADVANCE,RUNNING,CNC 5,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:32.723436,frame,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:36.377958,frame,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05 19:32:40,door,15,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05 19:32:40,door,15,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05T22:32:53.531043,frame,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:32:55.546564,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:32:56,arch,10,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05 19:32:56,arch,10,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05T22:33:00.412960,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:00.866172,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:01.087231,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:01.287083,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:01.677742,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:01.680396,arch,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:01.855529,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:02.043431,arch,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:02.508184,arch,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:03.259399,arch,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:33:20.250547,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:33:20,door,15,END,FINISHED,Wood_Line_1,99,,99,,,,0,,0,,100.0,36.36,-70,Poor,Arduino
+2026-05-05 19:33:20,door,15,END,FINISHED,Wood_Line_1,99,,99,,,,0,,0,,100.0,36.36,-70,Poor,Arduino
+2026-05-05 19:33:20,frame,21,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-70,Poor,Arduino
+2026-05-05 19:33:20,frame,21,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-70,Poor,Arduino
+2026-05-05T22:33:32.820054,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:33:34,door,16,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05 19:33:34,door,16,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05T22:33:46.613913,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:33:48,door,16,END,STOPPED,Wood_Line_1,14,,14,,,,0,,0,,100.0,257.14,-76,Poor,Arduino
+2026-05-05 19:33:48,door,16,END,FINISHED,Wood_Line_1,14,,14,,,,0,,0,,100.0,257.14,-76,Poor,Arduino
+2026-05-05 19:33:56,arch,10,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-75,Poor,Arduino
+2026-05-05 19:33:56,arch,10,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-75,Poor,Arduino
+2026-05-05 19:34:20,frame,21,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:34:20,frame,21,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:34:56,arch,10,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-75,Poor,Arduino
+2026-05-05 19:34:56,arch,10,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-75,Poor,Arduino
+2026-05-05 19:35:20,frame,21,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-78,Poor,Arduino
+2026-05-05 19:35:20,frame,21,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-78,Poor,Arduino
+2026-05-05T22:35:44.077579,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:35:44,door,17,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05 19:35:44,door,17,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-76,Poor,Arduino
+2026-05-05T22:35:48.024615,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:48.641347,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:48.861571,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:49.267195,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:49.269223,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:53.630199,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:53.967314,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:54.445965,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:35:55.168004,door,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05 19:35:56,arch,10,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-77,Poor,Arduino
+2026-05-05 19:35:56,arch,10,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-77,Poor,Arduino
+2026-05-05 19:36:20,frame,21,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:36:20,frame,21,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:36:44,door,17,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-74,Poor,Arduino
+2026-05-05 19:36:44,door,17,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-74,Poor,Arduino
+2026-05-05T22:36:53.385176,door,,COMMAND,PAUSE,,,,,,,,,,,,,,,,Website
+2026-05-05 19:36:54,door,17,PAUSE,PAUSED,Wood_Line_1,70,,70,,,,0,,1,,100.0,51.43,-76,Poor,Arduino
+2026-05-05 19:36:54,door,17,PAUSE,PAUSED,Wood_Line_1,70,,70,,,,0,,1,,100.0,51.43,-76,Poor,Arduino
+2026-05-05 19:36:56,arch,10,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:36:56,arch,10,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05T22:36:57.260798,door,,COMMAND,RESUME,,,,,,,,,,,,,,,,Website
+2026-05-05 19:36:58,door,17,RESUME,RUNNING,Wood_Line_1,70,,73,,,,3,,1,,94.66,51.43,-75,Poor,Arduino
+2026-05-05 19:36:58,door,17,RESUME,RUNNING,Wood_Line_1,70,,73,,,,3,,1,,94.66,51.43,-75,Poor,Arduino
+2026-05-05T22:37:06.728611,frame,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:37:08,frame,21,END,FINISHED,Wood_Line_1,287,,287,,,,0,,0,,100.0,12.54,-77,Poor,Arduino
+2026-05-05 19:37:08,frame,21,END,FINISHED,Wood_Line_1,287,,287,,,,0,,0,,100.0,12.54,-77,Poor,Arduino
+2026-05-05 19:37:44,door,17,STATUS,RUNNING,Wood_Line_1,116,,120,,,,3,,1,,96.72,31.03,-73,Poor,Arduino
+2026-05-05 19:37:44,door,17,STATUS,RUNNING,Wood_Line_1,116,,120,,,,3,,1,,96.72,31.03,-73,Poor,Arduino
+2026-05-05 19:37:56,arch,10,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-77,Poor,Arduino
+2026-05-05 19:37:56,arch,10,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-77,Poor,Arduino
+2026-05-05 19:38:44,door,17,STATUS,RUNNING,Wood_Line_1,176,,180,,,,3,,1,,97.81,20.45,-74,Poor,Arduino
+2026-05-05 19:38:44,door,17,STATUS,RUNNING,Wood_Line_1,176,,180,,,,3,,1,,97.81,20.45,-74,Poor,Arduino
+2026-05-05 19:38:56,arch,10,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-72,Poor,Arduino
+2026-05-05 19:38:56,arch,10,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-72,Poor,Arduino
+2026-05-05 19:39:44,door,17,STATUS,RUNNING,Wood_Line_1,236,,240,,,,3,,1,,98.36,15.25,-79,Poor,Arduino
+2026-05-05 19:39:44,door,17,STATUS,RUNNING,Wood_Line_1,236,,240,,,,3,,1,,98.36,15.25,-79,Poor,Arduino
+2026-05-05 19:39:56,arch,10,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-77,Poor,Arduino
+2026-05-05 19:39:56,arch,10,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-77,Poor,Arduino
+2026-05-05T22:40:02.556659,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:40:02,door,17,END,FINISHED,Wood_Line_1,254,,257,,,,3,,1,,98.47,14.01,-79,Poor,Arduino
+2026-05-05 19:40:02,door,17,END,FINISHED,Wood_Line_1,254,,257,,,,3,,1,,98.47,14.01,-79,Poor,Arduino
+2026-05-05T22:40:07.412896,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:40:08,door,18,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-79,Poor,Arduino
+2026-05-05 19:40:08,door,18,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-79,Poor,Arduino
+2026-05-05T22:40:11.555077,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:12.082226,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:12.539160,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:12.996542,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:13.897821,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:14.060707,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:14.689534,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:15.332977,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:17.790947,door,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:23.855506,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:40:24,frame,22,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05 19:40:24,frame,22,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-77,Poor,Arduino
+2026-05-05T22:40:27.295527,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:27.556759,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:27.991998,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:28.240412,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:28.743516,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:28.750308,frame,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:29.004856,frame,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:29.274150,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:29.557401,frame,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:30.074210,frame,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:30.153799,frame,,ADVANCE,RUNNING,Spindle Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:30.538439,frame,,ADVANCE,RUNNING,Sliding Table Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:31.394260,frame,,ADVANCE,RUNNING,Frame Tongue,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:31.675206,frame,,ADVANCE,RUNNING,CNC 5,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:34.827664,frame,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:35.407406,frame,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:36.394394,frame,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:40:47.083265,arch,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:40:48,arch,10,END,FINISHED,Wood_Line_1,471,,471,,,,0,,0,,100.0,7.64,-76,Poor,Arduino
+2026-05-05 19:40:48,arch,10,END,FINISHED,Wood_Line_1,471,,471,,,,0,,0,,100.0,7.64,-76,Poor,Arduino
+2026-05-05 19:41:08,door,18,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:41:08,door,18,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:41:24,frame,22,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05 19:41:24,frame,22,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05 19:42:08,door,18,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:42:08,door,18,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:42:24,frame,22,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-79,Poor,Arduino
+2026-05-05 19:42:24,frame,22,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-79,Poor,Arduino
+2026-05-05 19:43:08,door,18,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor,Arduino
+2026-05-05 19:43:08,door,18,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-76,Poor,Arduino
+2026-05-05 19:43:24,frame,22,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-77,Poor,Arduino
+2026-05-05 19:43:24,frame,22,STATUS,RUNNING,Wood_Line_1,180,,180,,,,0,,0,,100.0,20.0,-77,Poor,Arduino
+2026-05-05 19:44:08,door,18,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-77,Poor,Arduino
+2026-05-05 19:44:08,door,18,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-77,Poor,Arduino
+2026-05-05 19:44:24,frame,22,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:44:24,frame,22,STATUS,RUNNING,Wood_Line_1,240,,240,,,,0,,0,,100.0,15.0,-75,Poor,Arduino
+2026-05-05 19:45:08,door,18,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-80,Poor,Arduino
+2026-05-05 19:45:08,door,18,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-80,Poor,Arduino
+2026-05-05T22:45:16.547120,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:19.238210,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:19.784954,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:23.061001,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:23.232884,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:23.631682,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:23.633540,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:23.771078,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:45:23.971710,door,,ADVANCE,READY,Scale Saw,,,,,,,,,,,,,,,Website
+2026-05-05 19:45:24,frame,22,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-79,Poor,Arduino
+2026-05-05 19:45:24,frame,22,STATUS,RUNNING,Wood_Line_1,300,,300,,,,0,,0,,100.0,12.0,-79,Poor,Arduino
+2026-05-05T22:45:25.165228,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:46:08,door,18,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-77,Poor,Arduino
+2026-05-05 19:46:08,door,18,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-77,Poor,Arduino
+2026-05-05 19:46:24,frame,22,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-76,Poor,Arduino
+2026-05-05 19:46:24,frame,22,STATUS,RUNNING,Wood_Line_1,360,,360,,,,0,,0,,100.0,10.0,-76,Poor,Arduino
+2026-05-05T22:46:41.537701,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:42.747857,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:43.139773,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:43.579061,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:44.233425,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:44.767817,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:45.332078,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:45.685230,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:46.015268,door,,ADVANCE,READY,Scale Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:47.447509,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:51.016934,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:54.260097,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:54.262752,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:54.407205,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:54.557569,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:54.708094,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:54.874441,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:55.040429,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05T22:46:58.332680,door,,COMMAND,END,,,,,,,,,,,,,,,,Website
+2026-05-05 19:46:58,door,18,END,STOPPED,Wood_Line_1,409,,409,,,,0,,0,,100.0,8.8,-77,Poor,Arduino
+2026-05-05 19:46:58,door,18,END,FINISHED,Wood_Line_1,409,,409,,,,0,,0,,100.0,8.8,-77,Poor,Arduino
+2026-05-05 19:47:24,frame,22,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-74,Poor,Arduino
+2026-05-05 19:47:24,frame,22,STATUS,RUNNING,Wood_Line_1,420,,420,,,,0,,0,,100.0,8.57,-74,Poor,Arduino
+2026-05-05 19:47:42,door,18,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-76,Poor,Arduino
+2026-05-05 19:47:43,frame,22,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-75,Poor,Arduino
+2026-05-05 19:47:43,arch,10,BOOT,IDLE,Wood_Line_1,0,,0,,,,0,,0,,0.0,0.0,-75,Poor,Arduino
+2026-05-05T22:49:24.289860,door,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:49:25,door,19,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05 19:49:25,door,19,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-75,Poor,Arduino
+2026-05-05T22:49:27.481839,door,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:28.067107,door,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:28.264498,door,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:28.526739,door,,ADVANCE,RUNNING,Press,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:28.740107,door,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:29.425597,door,,ADVANCE,RUNNING,NC Doors,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:29.433417,door,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:30.349404,door,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:31.255204,door,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:35.109866,frame,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:49:35,frame,23,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-78,Poor,Arduino
+2026-05-05 19:49:35,frame,23,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-78,Poor,Arduino
+2026-05-05T22:49:36.472532,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:37.036057,frame,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:37.243559,frame,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:37.434194,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:37.929302,frame,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:37.931626,frame,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:38.016325,frame,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:38.234349,frame,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:38.715402,frame,,ADVANCE,RUNNING,Veneer Stitcher,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:38.919680,frame,,ADVANCE,RUNNING,Cleaning,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:39.426682,frame,,ADVANCE,RUNNING,Spindle Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:39.431124,frame,,ADVANCE,RUNNING,Sliding Table Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:41.382596,frame,,ADVANCE,RUNNING,Frame Tongue,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:41.774205,frame,,ADVANCE,RUNNING,CNC 5,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:41.957663,frame,,ADVANCE,RUNNING,Cross Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:42.499461,frame,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:43.775278,frame,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:46.579452,arch,,COMMAND,START,,,,,,,,,,,,,,,,Website
+2026-05-05 19:49:47,arch,11,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-78,Poor,Arduino
+2026-05-05 19:49:47,arch,11,START,RUNNING,Wood_Line_1,0,,0,,,,0,,0,,100.0,0.0,-78,Poor,Arduino
+2026-05-05T22:49:48.448002,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:49.185828,arch,,ADVANCE,RUNNING,Surface Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:49.209227,arch,,ADVANCE,RUNNING,Thickness Planner,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:49.400289,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:49.628719,arch,,ADVANCE,RUNNING,Rip Saw,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:49.976644,arch,,ADVANCE,RUNNING,Edge Banding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:50.085243,arch,,ADVANCE,RUNNING,6 Head Molder,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:50.621836,arch,,ADVANCE,RUNNING,Sanding,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:50.624594,arch,,ADVANCE,RUNNING,Paint,,,,,,,,,,,,,,,Website
+2026-05-05T22:49:52.390337,arch,,ADVANCE,STOPPED,,,,,,,,,,,,,,,,Website
+2026-05-05 19:50:25,door,19,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-73,Poor,Arduino
+2026-05-05 19:50:25,door,19,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-73,Poor,Arduino
+2026-05-05 19:50:35,frame,23,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05 19:50:35,frame,23,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-76,Poor,Arduino
+2026-05-05 19:50:47,arch,11,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:50:47,arch,11,STATUS,RUNNING,Wood_Line_1,60,,60,,,,0,,0,,100.0,60.0,-77,Poor,Arduino
+2026-05-05 19:51:25,door,19,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-75,Poor,Arduino
+2026-05-05 19:51:25,door,19,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-75,Poor,Arduino
+2026-05-05 19:51:35,frame,23,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:51:35,frame,23,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-76,Poor,Arduino
+2026-05-05 19:51:47,arch,11,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-78,Poor,Arduino
+2026-05-05 19:51:47,arch,11,STATUS,RUNNING,Wood_Line_1,120,,120,,,,0,,0,,100.0,30.0,-78,Poor,Arduino
