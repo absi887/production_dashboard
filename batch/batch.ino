@@ -2,9 +2,18 @@
  * ============================================================================
  * ESP32 Batch Tracking System
  * ============================================================================
- * Tracks batch processing with pause/resume functionality
- * Sends data to Flask server and saves to CSV
- * Features: Offline queue, auto-reconnect, periodic status updates
+ * Tracks batch processing with pause/resume; PLAY always continues work:
+ *   PAUSED -> RESUME, IDLE/PROCUREMENT -> new START (fixes dashboard "START"
+ *   while paused, which previously no-oped).
+ * Synchronized multi-lane: use {"line":"all","command":"START"} or serial
+ *   STARTALL / PLAYALL — shared millis() batch start for lanes that begin
+ *   together.
+ * Optional GET /api/machine-config?machine=... JSON keys per lane:
+ *   "door_expected_s":3600,"door_qty":2,"frame_expected_s":...
+ * Emits expected_remaining_s, variance_s (actual−expected), STAGE_TARGET
+ *   when active time reaches expected_duration_s (if configured).
+ * Buttons (INPUT_PULLUP, LOW = pressed): short tap = PLAY, double = PAUSE
+ *   while running, long hold = END, triple (idle) = PROCUREMENT.
  * ============================================================================
  */
 
@@ -15,7 +24,9 @@
 #include <HTTPClient.h>
 #include <WebSocketsClient.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <time.h>
+
 
 // ============================================================================
 // CONSTANTS & CONFIGURATION
@@ -40,7 +51,9 @@ const int DOUBLE_CLICK_MS = 300;
 #define HTTP_TIMEOUT 5000
 #define STATUS_UPDATE_INTERVAL 60000 // Send status update every 60 seconds
 #define COMMAND_CHECK_INTERVAL 2000 // Check for remote commands every 2 seconds
+#define CONFIG_FETCH_INTERVAL_MS 120000 // Refresh expected times from server
 #define MAX_QUEUE_SIZE 15           // Slightly increased for 3 lines
+#define BUTTON_DEBOUNCE_MS 45       // Ignore very short presses (noise)
 
 // EEPROM
 #define EEPROM_SIZE 128 // Increased for 3 batch numbers
@@ -52,9 +65,13 @@ const char *ssid = "AnasAlsayed-2.4";
 const char *password = "1234567890";
 
 // Flask Server Configuration
-const char *serverIP = "192.168.1.16";
-const int serverPort = 5002;
+const char *serverIP = "productionbackend-production-1b08.up.railway.app";
+const int serverPort = 443;
+bool useHTTPS = true;
 String serverURL = "";
+String commandURL = "";
+String configURL = ""; // Optional: /api/machine-config?machine=...
+
 
 // NTP Configuration
 const char *ntpServer = "pool.ntp.org";
@@ -93,10 +110,16 @@ struct LineData {
   int pauseCount = 0;
   int batchNumber = 0;
   int clickCount = 0;
+
+  // Expected duration from server / defaults (seconds, 0 = unknown)
+  long expectedDurationSec = 0;
+  int plannedQuantity = 1;
+  bool stageTargetLogged = false;
 };
 
 LineData lines[NUM_LINES];
 unsigned long lastCommandCheck = 0;
+unsigned long lastConfigFetch = 0;
 WebSocketsClient webSocket;
 
 // Offline Event Queue
@@ -117,6 +140,9 @@ int queueCount = 0;
 void handleButton(int idx);
 void updateLEDs(int idx);
 void startBatch(int idx);
+void startBatchAt(int idx, unsigned long batchStartMillis);
+void unifiedPlay(int idx); // RESUME if paused, else START from IDLE/PROCUREMENT
+void unifiedPlayAll();
 void pauseBatch(int idx);
 void resumeBatch(int idx);
 void endBatch(int idx);
@@ -132,7 +158,11 @@ void processEventQueue();
 void updatePeriodicStatus();
 void reconnectWiFi();
 void checkRemoteCommands();
+void fetchMachineConfig();
+void applyRemoteCommandForLine(int idx, const String &command);
+void dispatchRemotePayload(const String &payload);
 String buildJSONPayload(int idx, const String &evt, const String &status);
+void checkStageTargets();
 
 // Utility Functions
 String getTimestamp();
@@ -192,16 +222,41 @@ void setup() {
     Serial.println("\n✓ WiFi Connected!");
     Serial.printf("  IP Address: %s\n", WiFi.localIP().toString().c_str());
 
-    serverURL =
-        "http://" + String(serverIP) + ":" + String(serverPort) + "/data";
+    if (useHTTPS) {
+      serverURL = "https://" + String(serverIP) + "/data";
+      commandURL = "https://" + String(serverIP) + "/api/command?line=all";
+      configURL = "https://" + String(serverIP) + "/api/machine-config?machine=" +
+                   machineName;
+    } else {
+      serverURL = "http://" + String(serverIP) + ":" + String(serverPort) + "/data";
+      commandURL = "http://" + String(serverIP) + ":" + String(serverPort) +
+                   "/api/command?line=all";
+      configURL = "http://" + String(serverIP) + ":" + String(serverPort) +
+                  "/api/machine-config?machine=" + machineName;
+    }
+
     Serial.printf("  Server URL: %s\n", serverURL.c_str());
+    Serial.printf("  Config URL: %s\n", configURL.c_str());
+
+    // Sensible defaults until /api/machine-config returns per-lane targets
+    lines[0].expectedDurationSec = 0;
+    lines[1].expectedDurationSec = 0;
+    lines[2].expectedDurationSec = 0;
+    lines[0].plannedQuantity = 1;
+    lines[1].plannedQuantity = 1;
+    lines[2].plannedQuantity = 1;
 
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
     // WebSocket Setup
-    webSocket.begin(serverIP, serverPort, "/ws");
+    if (useHTTPS) {
+      webSocket.beginSSL(serverIP, serverPort, "/ws");
+    } else {
+      webSocket.begin(serverIP, serverPort, "/ws");
+    }
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(5000);
+
 
     Serial.print("Syncing NTP time");
     int ntpRetries = 0;
@@ -216,11 +271,15 @@ void setup() {
       ntpRetries++;
     }
     processEventQueue();
+    fetchMachineConfig();
+    lastConfigFetch = millis();
   } else {
     Serial.println("\n✗ WiFi connection failed. Events will be queued.");
   }
 
   Serial.println("\n✓ System ready! (3 Lines Monitoring)");
+  Serial.println("Serial: STATUS | STARTALL PLAYALL | PAUSEALL | RESUMEALL | "
+                 "ENDALL | FETCHCONFIG");
 
   // Send an immediate "ONLINE" signal to the dashboard for all lines
   if (WiFi.status() == WL_CONNECTED) {
@@ -244,12 +303,36 @@ void loop() {
 
     if (command == "STATUS" || command == "S") {
       for (int i = 0; i < NUM_LINES; i++) {
-        Serial.printf("%s: Batch #%d | State: %s\n", lineNames[i].c_str(),
-                      lines[i].batchNumber,
-                      lines[i].currentState == IDLE      ? "IDLE"
-                      : lines[i].currentState == RUNNING ? "RUNNING"
-                                                         : "PAUSED");
+        const char *st =
+            lines[i].currentState == IDLE         ? "IDLE"
+            : lines[i].currentState == RUNNING    ? "RUNNING"
+            : lines[i].currentState == PAUSED     ? "PAUSED"
+            : lines[i].currentState == PROCUREMENT ? "PROCUREMENT"
+                                                  : "?";
+        Serial.printf(
+            "%s: Batch #%d | %s | exp %lds | qty %d\n", lineNames[i].c_str(),
+            lines[i].batchNumber, st, lines[i].expectedDurationSec,
+            lines[i].plannedQuantity);
       }
+    } else if (command == "STARTALL" || command == "PLAYALL") {
+      unifiedPlayAll();
+    } else if (command == "PAUSEALL") {
+      for (int i = 0; i < NUM_LINES; i++) {
+        if (lines[i].currentState == RUNNING)
+          pauseBatch(i);
+      }
+    } else if (command == "RESUMEALL") {
+      for (int i = 0; i < NUM_LINES; i++) {
+        if (lines[i].currentState == PAUSED)
+          resumeBatch(i);
+      }
+    } else if (command == "ENDALL") {
+      for (int i = 0; i < NUM_LINES; i++) {
+        if (lines[i].currentState != IDLE)
+          endBatch(i);
+      }
+    } else if (command == "FETCHCONFIG") {
+      fetchMachineConfig();
     }
   }
 
@@ -261,7 +344,13 @@ void loop() {
     processEventQueue();
     checkRemoteCommands();
     updatePeriodicStatus();
+    if (millis() - lastConfigFetch >= CONFIG_FETCH_INTERVAL_MS) {
+      lastConfigFetch = millis();
+      fetchMachineConfig();
+    }
   }
+
+  checkStageTargets();
 
   // Handle Buttons for all lines
   for (int i = 0; i < NUM_LINES; i++) {
@@ -283,6 +372,10 @@ void handleButton(int idx) {
     line.releasedTime = millis();
     unsigned long pressDuration = line.releasedTime - line.pressedTime;
 
+    if (pressDuration < BUTTON_DEBOUNCE_MS) {
+      return;
+    }
+
     if (pressDuration > LONG_PRESS_MS) {
       endBatch(idx);
       line.clickCount = 0;
@@ -298,11 +391,8 @@ void handleButton(int idx) {
     line.clickCount = 0;
 
     if (clicks == 1) {
-      // Single Click
-      if (line.currentState == IDLE || line.currentState == PROCUREMENT)
-        startBatch(idx);
-      else if (line.currentState == PAUSED)
-        resumeBatch(idx);
+      // Single click = PLAY (start new job or resume after pause)
+      unifiedPlay(idx);
     } else if (clicks == 2) {
       // Double Click
       if (line.currentState == RUNNING)
@@ -328,11 +418,34 @@ void updateLEDs(int idx) {
                    : LOW);
 }
 
-void startBatch(int idx) {
+void unifiedPlay(int idx) {
+  if (lines[idx].currentState == PAUSED) {
+    resumeBatch(idx);
+  } else if (lines[idx].currentState == IDLE ||
+             lines[idx].currentState == PROCUREMENT) {
+    startBatch(idx);
+  }
+}
+
+void unifiedPlayAll() {
+  for (int i = 0; i < NUM_LINES; i++) {
+    if (lines[i].currentState == PAUSED)
+      resumeBatch(i);
+  }
+  unsigned long syncT = millis();
+  for (int i = 0; i < NUM_LINES; i++) {
+    if (lines[i].currentState == IDLE ||
+        lines[i].currentState == PROCUREMENT)
+      startBatchAt(i, syncT);
+  }
+}
+
+void startBatch(int idx) { startBatchAt(idx, millis()); }
+
+void startBatchAt(int idx, unsigned long batchStartMillis) {
   if (lines[idx].currentState != IDLE && lines[idx].currentState != PROCUREMENT)
     return;
 
-  // Calculate Lead Time if we were in PROCUREMENT mode
   long leadTimeS = 0;
   if (lines[idx].currentState == PROCUREMENT &&
       lines[idx].procurementStartTime > 0) {
@@ -342,21 +455,18 @@ void startBatch(int idx) {
   lines[idx].batchNumber++;
   saveBatchNumbers();
 
-  lines[idx].batchStartTime = millis();
+  lines[idx].batchStartTime = batchStartMillis;
   lines[idx].totalPausedTime = 0;
   lines[idx].pauseCount = 0;
   lines[idx].batchEndTime = 0;
   lines[idx].lastStatusUpdate = millis();
   lines[idx].currentState = RUNNING;
+  lines[idx].stageTargetLogged = false;
 
   updateLEDs(idx);
   Serial.printf("\n🚀 [%s] Starting Batch #%d (Lead Time: %ld s)\n",
                 lineNames[idx].c_str(), lines[idx].batchNumber, leadTimeS);
 
-  // Create payload with lead time
-  String jsonData = buildJSONPayload(idx, "START", "RUNNING");
-  // Manually insert lead time into JSON before closing brace if needed, or
-  // update buildJSONPayload
   logEvent(idx, "START", "RUNNING");
 }
 
@@ -436,20 +546,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
   case WStype_TEXT: {
     String msg = String((char *)payload);
     Serial.printf("[WSc] Received text: %s\n", msg.c_str());
-
-    // Instant Remote Command Handling
-    for (int i = 0; i < NUM_LINES; i++) {
-      if (msg.indexOf(lineNames[i]) >= 0) {
-        if (msg.indexOf("\"START\"") >= 0)
-          startBatch(i);
-        else if (msg.indexOf("\"PAUSE\"") >= 0)
-          pauseBatch(i);
-        else if (msg.indexOf("\"RESUME\"") >= 0)
-          resumeBatch(i);
-        else if (msg.indexOf("\"END\"") >= 0)
-          endBatch(i);
-      }
-    }
+    dispatchRemotePayload(msg);
   } break;
   }
 }
@@ -489,11 +586,20 @@ bool sendHTTPRequest(const String &jsonData, int retries) {
   if (WiFi.status() != WL_CONNECTED)
     return false;
 
+  WiFiClientSecure client;
+  if (useHTTPS) client.setInsecure();
+  
   HTTPClient http;
-  http.begin(serverURL);
+  if (useHTTPS) {
+    http.begin(client, serverURL);
+  } else {
+    http.begin(serverURL);
+  }
+  
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(HTTP_TIMEOUT);
   http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+
 
   for (int attempt = 0; attempt < retries; attempt++) {
     int code = http.POST(jsonData);
@@ -583,47 +689,178 @@ void checkRemoteCommands() {
 
   lastCommandCheck = millis();
 
+  WiFiClientSecure client;
+  if (useHTTPS) client.setInsecure();
+  
   HTTPClient http;
-  // Check commands for all lines at once
-  String commandURL = "http://" + String(serverIP) + ":" + String(serverPort) +
-                      "/api/command?line=all";
-  http.begin(commandURL);
+  if (useHTTPS) {
+    http.begin(client, commandURL);
+  } else {
+    http.begin(commandURL);
+  }
   http.setTimeout(2000);
+
 
   int code = http.GET();
 
   if (code == HTTP_CODE_OK || code == 200) {
     String response = http.getString();
+    dispatchRemotePayload(response);
+  }
+  http.end();
+}
 
-    // Simple parsing for {"line": "Line_1", "command": "START"}
-    for (int i = 0; i < NUM_LINES; i++) {
-      if (response.indexOf(lineNames[i]) >= 0) {
-        String command = "";
-        if (response.indexOf("\"START\"") >= 0)
-          command = "START";
-        else if (response.indexOf("\"PAUSE\"") >= 0)
-          command = "PAUSE";
-        else if (response.indexOf("\"RESUME\"") >= 0)
-          command = "RESUME";
-        else if (response.indexOf("\"END\"") >= 0)
-          command = "END";
+static bool parseJsonStringCommand(const String &response, String *cmdOut) {
+  *cmdOut = "";
+  if (response.indexOf("\"PLAY\"") >= 0 || response.indexOf("\"START\"") >= 0)
+    *cmdOut = "START";
+  else if (response.indexOf("\"PAUSE\"") >= 0)
+    *cmdOut = "PAUSE";
+  else if (response.indexOf("\"RESUME\"") >= 0)
+    *cmdOut = "RESUME";
+  else if (response.indexOf("\"END\"") >= 0)
+    *cmdOut = "END";
+  return cmdOut->length() > 0;
+}
 
-        if (command != "") {
-          Serial.printf("📥 Remote Command for %s: %s\n", lineNames[i].c_str(),
-                        command.c_str());
-          if (command == "START")
-            startBatch(i);
-          else if (command == "PAUSE")
+static bool parseLineTarget(const String &response, int *lineIdxOut) {
+  if (response.indexOf("\"line\":\"all\"") >= 0 ||
+      response.indexOf("\"line\": \"all\"") >= 0) {
+    *lineIdxOut = -1;
+    return true;
+  }
+  for (int i = 0; i < NUM_LINES; i++) {
+    String a = "\"line\":\"" + lineNames[i] + "\"";
+    String b = "\"line\": \"" + lineNames[i] + "\"";
+    if (response.indexOf(a) >= 0 || response.indexOf(b) >= 0) {
+      *lineIdxOut = i;
+      return true;
+    }
+  }
+  return false;
+}
+
+void applyRemoteCommandForLine(int idx, const String &command) {
+  if (idx < 0 || idx >= NUM_LINES)
+    return;
+  if (command == "START")
+    unifiedPlay(idx);
+  else if (command == "PAUSE")
+    pauseBatch(idx);
+  else if (command == "RESUME")
+    resumeBatch(idx);
+  else if (command == "END")
+    endBatch(idx);
+}
+
+void dispatchRemotePayload(const String &payload) {
+  String cmd;
+  if (!parseJsonStringCommand(payload, &cmd))
+    return;
+
+  int lineSpec = 0;
+  if (parseLineTarget(payload, &lineSpec)) {
+    if (lineSpec == -1) {
+      Serial.printf("📥 Remote Command (all lanes): %s\n", cmd.c_str());
+      if (cmd == "START")
+        unifiedPlayAll();
+      else if (cmd == "PAUSE") {
+        for (int i = 0; i < NUM_LINES; i++) {
+          if (lines[i].currentState == RUNNING)
             pauseBatch(i);
-          else if (command == "RESUME")
+        }
+      } else if (cmd == "RESUME") {
+        for (int i = 0; i < NUM_LINES; i++) {
+          if (lines[i].currentState == PAUSED)
             resumeBatch(i);
-          else if (command == "END")
+        }
+      } else if (cmd == "END") {
+        for (int i = 0; i < NUM_LINES; i++) {
+          if (lines[i].currentState != IDLE)
             endBatch(i);
         }
       }
+      return;
+    }
+    Serial.printf("📥 Remote Command for %s: %s\n", lineNames[lineSpec].c_str(),
+                  cmd.c_str());
+    applyRemoteCommandForLine(lineSpec, cmd);
+    return;
+  }
+
+  for (int i = 0; i < NUM_LINES; i++) {
+    if (payload.indexOf(lineNames[i]) >= 0) {
+      Serial.printf("📥 Remote Command (legacy match %s): %s\n",
+                    lineNames[i].c_str(), cmd.c_str());
+      applyRemoteCommandForLine(i, cmd);
+      break;
     }
   }
+}
+
+void fetchMachineConfig() {
+  if (WiFi.status() != WL_CONNECTED || configURL.length() == 0)
+    return;
+
+  WiFiClientSecure client;
+  if (useHTTPS)
+    client.setInsecure();
+
+  HTTPClient http;
+  if (useHTTPS) {
+    http.begin(client, configURL);
+  } else {
+    http.begin(configURL);
+  }
+  http.setTimeout(HTTP_TIMEOUT);
+
+  int code = http.GET();
+  if (code != HTTP_CODE_OK && code != 200) {
+    http.end();
+    return;
+  }
+
+  String body = http.getString();
   http.end();
+
+  for (int i = 0; i < NUM_LINES; i++) {
+    String expKey = "\"" + lineNames[i] + "_expected_s\":";
+    String qtyKey = "\"" + lineNames[i] + "_qty\":";
+    int p = body.indexOf(expKey);
+    if (p >= 0) {
+      p += expKey.length();
+      long v = body.substring(p).toInt();
+      if (v >= 0 && v < 8640000L)
+        lines[i].expectedDurationSec = v;
+    }
+    p = body.indexOf(qtyKey);
+    if (p >= 0) {
+      p += qtyKey.length();
+      int q = body.substring(p).toInt();
+      if (q > 0 && q < 100000)
+        lines[i].plannedQuantity = q;
+    }
+  }
+  Serial.println("✓ Machine config refreshed (expected_s / qty per lane if present)");
+}
+
+void checkStageTargets() {
+  unsigned long now = millis();
+  for (int i = 0; i < NUM_LINES; i++) {
+    LineData &line = lines[i];
+    if (line.currentState != RUNNING || line.expectedDurationSec <= 0 ||
+        line.stageTargetLogged)
+      continue;
+    unsigned long elapsed = now - line.batchStartTime;
+    long activeS =
+        (elapsed > line.totalPausedTime) ? (elapsed - line.totalPausedTime) / 1000 : 0;
+    if (activeS >= line.expectedDurationSec) {
+      line.stageTargetLogged = true;
+      Serial.printf("⏱ [%s] Expected stage time reached (%ld s)\n",
+                    lineNames[i].c_str(), line.expectedDurationSec);
+      logEvent(i, "STAGE_TARGET", "RUNNING");
+    }
+  }
 }
 
 void reconnectWiFi() {
@@ -691,7 +928,21 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
                             : (rssi > -70) ? "Fair"
                                            : "Poor";
 
-  char buffer[1024];
+  long expectedRemS = 0;
+  long varianceS = 0;
+  if (line.expectedDurationSec > 0) {
+    if (evt == "END") {
+      varianceS = activeRuntimeSecs - line.expectedDurationSec;
+      expectedRemS = 0;
+    } else if (line.currentState == RUNNING || line.currentState == PAUSED) {
+      expectedRemS = line.expectedDurationSec - activeRuntimeSecs;
+      if (expectedRemS < 0)
+        expectedRemS = 0;
+      varianceS = activeRuntimeSecs - line.expectedDurationSec;
+    }
+  }
+
+  char buffer[1400];
   snprintf(buffer, sizeof(buffer),
            "{"
            "\"timestamp\":\"%s\","
@@ -708,12 +959,19 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
            "\"efficiency_percent\":%.2f,"
            "\"production_rate_per_hour\":%.2f,"
            "\"wifi_rssi\":%ld,"
-           "\"wifi_quality\":\"%s\""
+           "\"wifi_quality\":\"%s\","
+           "\"expected_duration_s\":%ld,"
+           "\"planned_quantity\":%d,"
+           "\"expected_remaining_s\":%ld,"
+           "\"variance_s\":%ld,"
+           "\"lane_sync_start_ms\":%lu"
            "}",
            getTimestamp().c_str(), line.batchNumber, evt.c_str(),
            status.c_str(), machineName.c_str(), lineNames[idx].c_str(),
            activeRuntimeSecs, totalElapsedSecs, accumulatedPauseSecs, leadTimeS,
-           line.pauseCount, efficiency, productionRate, rssi, wifiQuality);
+           line.pauseCount, efficiency, productionRate, rssi, wifiQuality,
+           line.expectedDurationSec, line.plannedQuantity, expectedRemS,
+           varianceS, (unsigned long)line.batchStartTime);
 
   return String(buffer);
 }
