@@ -61,7 +61,7 @@ const int DOUBLE_CLICK_MS = 300;
   0 // Base address for batch numbers (int = 4 bytes each)
 
 // WiFi Credentials
-const char *ssid = "AnasAlsayed-2.4";
+const char *ssid = "Anas";
 const char *password = "1234567890";
 
 // Flask Server Configuration
