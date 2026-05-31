@@ -9,7 +9,11 @@
  *   STARTALL / PLAYALL — shared millis() batch start for lanes that begin
  *   together.
  * Optional GET /api/machine-config?machine=... JSON keys per lane:
- *   "door_expected_s":3600,"door_qty":2,"frame_expected_s":...
+ *   "door_expected_s":3600,"door_qty":11,"door_stage_index":1,
+ *   "door_stage_key":"JOB-1|1|Edge Banding|RUNNING|2026-...",
+ *   "door_machine":"Edge Banding","door_status":"RUNNING"
+ * When door_stage_key changes the ESP32 resets its local stage timer so every
+ * production stage stays aligned with the dashboard (Scale Saw, Edge Banding, …).
  * Emits expected_remaining_s, variance_s (actual−expected), STAGE_TARGET
  *   when active time reaches expected_duration_s (if configured).
  * Buttons (INPUT_PULLUP, LOW = pressed): short tap = PLAY, double = PAUSE
@@ -51,7 +55,7 @@ const int DOUBLE_CLICK_MS = 300;
 #define HTTP_TIMEOUT 5000
 #define STATUS_UPDATE_INTERVAL 60000 // Send status update every 60 seconds
 #define COMMAND_CHECK_INTERVAL 2000 // Check for remote commands every 2 seconds
-#define CONFIG_FETCH_INTERVAL_MS 120000 // Refresh expected times from server
+#define CONFIG_FETCH_INTERVAL_MS 30000 // Refresh stage targets from server
 #define MAX_QUEUE_SIZE 15           // Slightly increased for 3 lines
 #define BUTTON_DEBOUNCE_MS 45       // Ignore very short presses (noise)
 
@@ -65,12 +69,13 @@ const char *ssid = "Anas";
 const char *password = "1234567890";
 
 // Flask Server Configuration
+// Patched automatically from server PUBLIC_URL on backend start (re-flash after deploy).
 const char *serverIP = "productionbackend-production-1b08.up.railway.app";
 const int serverPort = 443;
 bool useHTTPS = true;
 String serverURL = "";
 String commandURL = "";
-String configURL = ""; // Optional: /api/machine-config?machine=...
+String configURL = "";
 
 
 // NTP Configuration
@@ -79,7 +84,7 @@ const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 0;
 
 // Machine Identifier
-String machineName = "FAM-Hub-01";
+String machineName = "FAM Production Hub";
 String lineName = "door";
 String lineNames[NUM_LINES] = {"door", "frame", "arch"};
 
@@ -115,6 +120,13 @@ struct LineData {
   long expectedDurationSec = 0;
   int plannedQuantity = 1;
   bool stageTargetLogged = false;
+
+  // Dashboard sync (per-stage key from GET /api/machine-config or /data response)
+  String lastServerStageKey = "";
+  String serverOrderId = "";
+  int serverStageIndex = -1;
+  String serverMachine = "";
+  String serverLaneStatus = "";
 };
 
 LineData lines[NUM_LINES];
@@ -161,8 +173,15 @@ void checkRemoteCommands();
 void fetchMachineConfig();
 void applyRemoteCommandForLine(int idx, const String &command);
 void dispatchRemotePayload(const String &payload);
+void applyConfigFromPayload(const String &payload);
 String buildJSONPayload(int idx, const String &evt, const String &status);
 void checkStageTargets();
+void resetStageTimerFromServer(int idx);
+void syncStageFromServerConfig(int idx, const String &payload);
+void buildServerEndpoints();
+String urlEncodeMachineName(const String &name);
+static bool extractJsonStringAfterKey(const String &payload, const String &key,
+                                      String *out);
 
 // Utility Functions
 String getTimestamp();
@@ -222,21 +241,14 @@ void setup() {
     Serial.println("\n✓ WiFi Connected!");
     Serial.printf("  IP Address: %s\n", WiFi.localIP().toString().c_str());
 
-    if (useHTTPS) {
-      serverURL = "https://" + String(serverIP) + "/data";
-      commandURL = "https://" + String(serverIP) + "/api/command?line=all";
-      configURL = "https://" + String(serverIP) + "/api/machine-config?machine=" +
-                   machineName;
+    buildServerEndpoints();
+    if (serverURL.length() == 0) {
+      Serial.println("✗ Server URLs not configured — check serverIP / useHTTPS in batch.ino");
     } else {
-      serverURL = "http://" + String(serverIP) + ":" + String(serverPort) + "/data";
-      commandURL = "http://" + String(serverIP) + ":" + String(serverPort) +
-                   "/api/command?line=all";
-      configURL = "http://" + String(serverIP) + ":" + String(serverPort) +
-                  "/api/machine-config?machine=" + machineName;
+      Serial.printf("  Server URL: %s\n", serverURL.c_str());
+      Serial.printf("  Command URL: %s\n", commandURL.c_str());
+      Serial.printf("  Config URL: %s\n", configURL.c_str());
     }
-
-    Serial.printf("  Server URL: %s\n", serverURL.c_str());
-    Serial.printf("  Config URL: %s\n", configURL.c_str());
 
     // Sensible defaults until /api/machine-config returns per-lane targets
     lines[0].expectedDurationSec = 0;
@@ -249,13 +261,15 @@ void setup() {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
     // WebSocket Setup
-    if (useHTTPS) {
-      webSocket.beginSSL(serverIP, serverPort, "/ws");
-    } else {
-      webSocket.begin(serverIP, serverPort, "/ws");
+    if (serverURL.length() > 0) {
+      if (useHTTPS) {
+        webSocket.beginSSL(serverIP, serverPort, "/ws");
+      } else {
+        webSocket.begin(serverIP, serverPort, "/ws");
+      }
+      webSocket.onEvent(webSocketEvent);
+      webSocket.setReconnectInterval(5000);
     }
-    webSocket.onEvent(webSocketEvent);
-    webSocket.setReconnectInterval(5000);
 
 
     Serial.print("Syncing NTP time");
@@ -281,10 +295,11 @@ void setup() {
   Serial.println("Serial: STATUS | STARTALL PLAYALL | PAUSEALL | RESUMEALL | "
                  "ENDALL | FETCHCONFIG");
 
-  // Send an immediate "ONLINE" signal to the dashboard for all lines
+  // Send an immediate "ONLINE" signal to the dashboard for all lines (telemetry only)
   if (WiFi.status() == WL_CONNECTED) {
+    fetchMachineConfig();
     for (int i = 0; i < NUM_LINES; i++) {
-      logEvent(i, "BOOT", "IDLE");
+      logEvent(i, "ONLINE", "IDLE", false);
     }
   }
 
@@ -542,6 +557,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
     break;
   case WStype_CONNECTED:
     Serial.printf("[WSc] Connected to url: %s\n", payload);
+    fetchMachineConfig();
     break;
   case WStype_TEXT: {
     String msg = String((char *)payload);
@@ -606,10 +622,10 @@ bool sendHTTPRequest(const String &jsonData, int retries) {
 
     // Flask server returns 200 on success
     if (code == HTTP_CODE_OK || code == 200) {
-      // Read response for debugging
       String response = http.getString();
       if (response.length() > 0) {
-        Serial.printf("  Response: %s\n", response.substring(0, 100).c_str());
+        Serial.printf("  Response: %s\n", response.substring(0, 120).c_str());
+        applyConfigFromPayload(response);
       }
       http.end();
       return true;
@@ -753,7 +769,219 @@ void applyRemoteCommandForLine(int idx, const String &command) {
     endBatch(idx);
 }
 
+static bool extractQuotedCommandAfterKey(const String &payload, int searchFrom,
+                                         const String &key, String *cmdOut) {
+  int p = payload.indexOf(key, searchFrom);
+  if (p < 0)
+    return false;
+  p += key.length();
+  while (p < (int)payload.length() &&
+         (payload.charAt(p) == ' ' || payload.charAt(p) == '\t'))
+    p++;
+  if (p >= (int)payload.length())
+    return false;
+  if (payload.charAt(p) == '"') {
+    int end = payload.indexOf('"', p + 1);
+    if (end < 0)
+      return false;
+    *cmdOut = payload.substring(p + 1, end);
+    return cmdOut->length() > 0;
+  }
+  int end = p;
+  while (end < (int)payload.length() && payload.charAt(end) != ',' &&
+         payload.charAt(end) != '}' && payload.charAt(end) != ']')
+    end++;
+  *cmdOut = payload.substring(p, end);
+  cmdOut->trim();
+  if (*cmdOut == "null")
+    cmdOut = "";
+  return cmdOut->length() > 0;
+}
+
+static bool extractJsonStringAfterKey(const String &payload, const String &key,
+                                      String *out) {
+  *out = "";
+  int p = payload.indexOf(key);
+  if (p < 0)
+    return false;
+  p += key.length();
+  if (p >= (int)payload.length() || payload.charAt(p) != '"')
+    return false;
+  int end = payload.indexOf('"', p + 1);
+  if (end < 0)
+    return false;
+  *out = payload.substring(p + 1, end);
+  return true;
+}
+
+String urlEncodeMachineName(const String &name) {
+  String out = name;
+  out.replace(" ", "%20");
+  out.replace("#", "%23");
+  out.replace("&", "%26");
+  return out;
+}
+
+void buildServerEndpoints() {
+  serverURL = "";
+  commandURL = "";
+  configURL = "";
+
+  String host = String(serverIP);
+  host.trim();
+  if (host.length() == 0) {
+    Serial.println("✗ serverIP is empty — set PUBLIC_URL on backend or edit batch.ino");
+    return;
+  }
+
+  const String encodedMachine = urlEncodeMachineName(machineName);
+  const int port = serverPort > 0 ? serverPort : (useHTTPS ? 443 : 80);
+
+  if (useHTTPS) {
+    serverURL = "https://" + host + "/data";
+    commandURL = "https://" + host + "/api/command?line=all";
+    configURL = "https://" + host + "/api/machine-config?machine=" + encodedMachine;
+  } else {
+    serverURL = "http://" + host + ":" + String(port) + "/data";
+    commandURL = "http://" + host + ":" + String(port) + "/api/command?line=all";
+    configURL = "http://" + host + ":" + String(port) + "/api/machine-config?machine=" +
+                encodedMachine;
+  }
+}
+
+void resetStageTimerFromServer(int idx) {
+  if (idx < 0 || idx >= NUM_LINES)
+    return;
+  LineData &line = lines[idx];
+  if (line.currentState != RUNNING && line.currentState != PAUSED)
+    return;
+  line.batchStartTime = millis();
+  line.totalPausedTime = 0;
+  line.pauseStartTime = 0;
+  line.stageTargetLogged = false;
+  line.lastStatusUpdate = millis();
+  Serial.printf("🔄 [%s] Stage timer synced from dashboard (stage %d)\n",
+                lineNames[idx].c_str(), line.serverStageIndex);
+}
+
+void syncStageFromServerConfig(int idx, const String &payload) {
+  if (idx < 0 || idx >= NUM_LINES)
+    return;
+  LineData &line = lines[idx];
+
+  String stageKey;
+  String orderId;
+  String machine;
+  String laneStatus;
+  String stageKeyA = "\"" + lineNames[idx] + "_stage_key\":\"";
+  String stageKeyB = "\"" + lineNames[idx] + "_stage_key\": \"";
+  String orderKeyA = "\"" + lineNames[idx] + "_order_id\":\"";
+  String orderKeyB = "\"" + lineNames[idx] + "_order_id\": \"";
+  String machineKeyA = "\"" + lineNames[idx] + "_machine\":\"";
+  String machineKeyB = "\"" + lineNames[idx] + "_machine\": \"";
+  String statusKeyA = "\"" + lineNames[idx] + "_status\":\"";
+  String statusKeyB = "\"" + lineNames[idx] + "_status\": \"";
+  String stageIdxKey = "\"" + lineNames[idx] + "_stage_index\":";
+
+  if (!extractJsonStringAfterKey(payload, stageKeyA, &stageKey))
+    extractJsonStringAfterKey(payload, stageKeyB, &stageKey);
+  if (!extractJsonStringAfterKey(payload, orderKeyA, &orderId))
+    extractJsonStringAfterKey(payload, orderKeyB, &orderId);
+  if (!extractJsonStringAfterKey(payload, machineKeyA, &machine))
+    extractJsonStringAfterKey(payload, machineKeyB, &machine);
+  if (!extractJsonStringAfterKey(payload, statusKeyA, &laneStatus))
+    extractJsonStringAfterKey(payload, statusKeyB, &laneStatus);
+
+  int p = payload.indexOf(stageIdxKey);
+  if (p >= 0) {
+    p += stageIdxKey.length();
+    line.serverStageIndex = payload.substring(p).toInt();
+  }
+
+  if (orderId.length() > 0)
+    line.serverOrderId = orderId;
+  if (machine.length() > 0)
+    line.serverMachine = machine;
+  if (laneStatus.length() > 0)
+    line.serverLaneStatus = laneStatus;
+
+  if (stageKey.length() == 0)
+    return;
+
+  if (line.lastServerStageKey.length() > 0 && stageKey != line.lastServerStageKey) {
+    resetStageTimerFromServer(idx);
+  }
+  line.lastServerStageKey = stageKey;
+}
+
+void applyConfigFromPayload(const String &payload) {
+  for (int i = 0; i < NUM_LINES; i++) {
+    String expKey = "\"" + lineNames[i] + "_expected_s\":";
+    String qtyKey = "\"" + lineNames[i] + "_qty\":";
+    int p = payload.indexOf(expKey);
+    if (p >= 0) {
+      p += expKey.length();
+      long v = payload.substring(p).toInt();
+      if (v >= 0 && v < 8640000L)
+        lines[i].expectedDurationSec = v;
+    }
+    p = payload.indexOf(qtyKey);
+    if (p >= 0) {
+      p += qtyKey.length();
+      int q = payload.substring(p).toInt();
+      if (q > 0 && q < 100000)
+        lines[i].plannedQuantity = q;
+    }
+    syncStageFromServerConfig(i, payload);
+  }
+}
+
 void dispatchRemotePayload(const String &payload) {
+  applyConfigFromPayload(payload);
+
+  int listStart = payload.indexOf("\"command_list\"");
+  if (listStart >= 0) {
+    bool any = false;
+    for (int i = 0; i < NUM_LINES; i++) {
+      String lineKey = "\"line\":\"" + lineNames[i] + "\"";
+      String lineKeySp = "\"line\": \"" + lineNames[i] + "\"";
+      int pos = payload.indexOf(lineKey, listStart);
+      if (pos < 0)
+        pos = payload.indexOf(lineKeySp, listStart);
+      if (pos < 0)
+        continue;
+      String cmd;
+      if (extractQuotedCommandAfterKey(payload, pos, "\"command\":", &cmd) ||
+          extractQuotedCommandAfterKey(payload, pos, "\"command\": ", &cmd)) {
+        Serial.printf("📥 Remote Command (list %s): %s\n", lineNames[i].c_str(),
+                      cmd.c_str());
+        applyRemoteCommandForLine(i, cmd);
+        any = true;
+      }
+    }
+    if (any)
+      return;
+  }
+
+  int cmdBlock = payload.indexOf("\"commands\"");
+  if (cmdBlock >= 0) {
+    bool any = false;
+    for (int i = 0; i < NUM_LINES; i++) {
+      String cmd;
+      String keyA = "\"" + lineNames[i] + "\":\"";
+      String keyB = "\"" + lineNames[i] + "\": \"";
+      if (extractQuotedCommandAfterKey(payload, cmdBlock, keyA, &cmd) ||
+          extractQuotedCommandAfterKey(payload, cmdBlock, keyB, &cmd)) {
+        Serial.printf("📥 Remote Command (map %s): %s\n", lineNames[i].c_str(),
+                      cmd.c_str());
+        applyRemoteCommandForLine(i, cmd);
+        any = true;
+      }
+    }
+    if (any)
+      return;
+  }
+
   String cmd;
   if (!parseJsonStringCommand(payload, &cmd))
     return;
@@ -822,26 +1050,10 @@ void fetchMachineConfig() {
 
   String body = http.getString();
   http.end();
-
-  for (int i = 0; i < NUM_LINES; i++) {
-    String expKey = "\"" + lineNames[i] + "_expected_s\":";
-    String qtyKey = "\"" + lineNames[i] + "_qty\":";
-    int p = body.indexOf(expKey);
-    if (p >= 0) {
-      p += expKey.length();
-      long v = body.substring(p).toInt();
-      if (v >= 0 && v < 8640000L)
-        lines[i].expectedDurationSec = v;
-    }
-    p = body.indexOf(qtyKey);
-    if (p >= 0) {
-      p += qtyKey.length();
-      int q = body.substring(p).toInt();
-      if (q > 0 && q < 100000)
-        lines[i].plannedQuantity = q;
-    }
-  }
-  Serial.println("✓ Machine config refreshed (expected_s / qty per lane if present)");
+  applyConfigFromPayload(body);
+  Serial.printf(
+      "✓ Machine config refreshed (%s exp %lds stage %d)\n",
+      lineNames[0].c_str(), lines[0].expectedDurationSec, lines[0].serverStageIndex);
 }
 
 void checkStageTargets() {
@@ -882,6 +1094,8 @@ void reconnectWiFi() {
   } else {
     reconnectDelay = 1000; // Reset on success
     Serial.println("✓ WiFi reconnected!");
+    buildServerEndpoints();
+    fetchMachineConfig();
     processEventQueue();
   }
 }
@@ -942,7 +1156,15 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
     }
   }
 
-  char buffer[1400];
+  char buffer[1600];
+  LineData &lineRef = lines[idx];
+  const char *dashOrder =
+      lineRef.serverOrderId.length() > 0 ? lineRef.serverOrderId.c_str() : "";
+  int dashStage =
+      lineRef.serverStageIndex >= 0 ? lineRef.serverStageIndex : -1;
+  const char *dashMachine =
+      lineRef.serverMachine.length() > 0 ? lineRef.serverMachine.c_str() : "";
+
   snprintf(buffer, sizeof(buffer),
            "{"
            "\"timestamp\":\"%s\","
@@ -964,14 +1186,18 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
            "\"planned_quantity\":%d,"
            "\"expected_remaining_s\":%ld,"
            "\"variance_s\":%ld,"
-           "\"lane_sync_start_ms\":%lu"
+           "\"lane_sync_start_ms\":%lu,"
+           "\"dashboard_order_id\":\"%s\","
+           "\"dashboard_stage_index\":%d,"
+           "\"dashboard_machine\":\"%s\""
            "}",
            getTimestamp().c_str(), line.batchNumber, evt.c_str(),
            status.c_str(), machineName.c_str(), lineNames[idx].c_str(),
            activeRuntimeSecs, totalElapsedSecs, accumulatedPauseSecs, leadTimeS,
            line.pauseCount, efficiency, productionRate, rssi, wifiQuality,
            line.expectedDurationSec, line.plannedQuantity, expectedRemS,
-           varianceS, (unsigned long)line.batchStartTime);
+           varianceS, (unsigned long)line.batchStartTime, dashOrder, dashStage,
+           dashMachine);
 
   return String(buffer);
 }
