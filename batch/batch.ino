@@ -55,7 +55,7 @@ const int DOUBLE_CLICK_MS = 300;
 #define HTTP_TIMEOUT 5000
 #define STATUS_UPDATE_INTERVAL 60000 // Send status update every 60 seconds
 #define COMMAND_CHECK_INTERVAL 2000 // Check for remote commands every 2 seconds
-#define CONFIG_FETCH_INTERVAL_MS 30000 // Refresh stage targets from server
+#define CONFIG_FETCH_INTERVAL_MS 10000 // Refresh lane status + LEDs from server
 #define MAX_QUEUE_SIZE 15           // Slightly increased for 3 lines
 #define BUTTON_DEBOUNCE_MS 45       // Ignore very short presses (noise)
 
@@ -70,9 +70,9 @@ const char *password = "1234567890";
 
 // Flask Server Configuration
 // Patched automatically from server PUBLIC_URL on backend start (re-flash after deploy).
-const char *serverIP = "productionbackend-production-1b08.up.railway.app";
-const int serverPort = 443;
-bool useHTTPS = true;
+const char *serverIP = "192.168.1.29";
+const int serverPort = 5002;
+bool useHTTPS = false;
 String serverURL = "";
 String commandURL = "";
 String configURL = "";
@@ -92,7 +92,8 @@ String lineNames[NUM_LINES] = {"door", "frame", "arch"};
 // GLOBAL VARIABLES
 // ============================================================================
 
-enum State { IDLE, RUNNING, PAUSED, PROCUREMENT };
+// READY = job deployed on lane, waiting for Start (yellow only — matches dashboard)
+enum State { IDLE, READY, RUNNING, PAUSED, PROCUREMENT };
 
 struct LineData {
   // State Management
@@ -174,6 +175,7 @@ void fetchMachineConfig();
 void applyRemoteCommandForLine(int idx, const String &command);
 void dispatchRemotePayload(const String &payload);
 void applyConfigFromPayload(const String &payload);
+void applyDashboardLaneStatus(int idx, const String &laneStatus);
 String buildJSONPayload(int idx, const String &evt, const String &status);
 void checkStageTargets();
 void resetStageTimerFromServer(int idx);
@@ -320,6 +322,7 @@ void loop() {
       for (int i = 0; i < NUM_LINES; i++) {
         const char *st =
             lines[i].currentState == IDLE         ? "IDLE"
+            : lines[i].currentState == READY      ? "READY"
             : lines[i].currentState == RUNNING    ? "RUNNING"
             : lines[i].currentState == PAUSED     ? "PAUSED"
             : lines[i].currentState == PROCUREMENT ? "PROCUREMENT"
@@ -422,22 +425,22 @@ void handleButton(int idx) {
 
 void updateLEDs(int idx) {
   LineData &line = lines[idx];
-  digitalWrite(GREEN_LEDS[idx], line.currentState == RUNNING ? HIGH : LOW);
-  digitalWrite(YELLOW_LEDS[idx],
-               (line.currentState == PAUSED || line.currentState == PROCUREMENT)
-                   ? HIGH
-                   : LOW);
-  digitalWrite(RED_LEDS[idx],
-               (line.currentState == IDLE || line.currentState == PROCUREMENT)
-                   ? HIGH
-                   : LOW);
+  // Green = running | Yellow = paused / ready / procurement | Red = idle (no job)
+  const bool green = line.currentState == RUNNING;
+  const bool yellow = line.currentState == PAUSED || line.currentState == READY ||
+                      line.currentState == PROCUREMENT;
+  const bool red = line.currentState == IDLE;
+  digitalWrite(GREEN_LEDS[idx], green ? HIGH : LOW);
+  digitalWrite(YELLOW_LEDS[idx], yellow ? HIGH : LOW);
+  digitalWrite(RED_LEDS[idx], red ? HIGH : LOW);
 }
 
 void unifiedPlay(int idx) {
   if (lines[idx].currentState == PAUSED) {
     resumeBatch(idx);
   } else if (lines[idx].currentState == IDLE ||
-             lines[idx].currentState == PROCUREMENT) {
+             lines[idx].currentState == PROCUREMENT ||
+             lines[idx].currentState == READY) {
     startBatch(idx);
   }
 }
@@ -449,7 +452,7 @@ void unifiedPlayAll() {
   }
   unsigned long syncT = millis();
   for (int i = 0; i < NUM_LINES; i++) {
-    if (lines[i].currentState == IDLE ||
+    if (lines[i].currentState == IDLE || lines[i].currentState == READY ||
         lines[i].currentState == PROCUREMENT)
       startBatchAt(i, syncT);
   }
@@ -458,7 +461,8 @@ void unifiedPlayAll() {
 void startBatch(int idx) { startBatchAt(idx, millis()); }
 
 void startBatchAt(int idx, unsigned long batchStartMillis) {
-  if (lines[idx].currentState != IDLE && lines[idx].currentState != PROCUREMENT)
+  if (lines[idx].currentState != IDLE && lines[idx].currentState != PROCUREMENT &&
+      lines[idx].currentState != READY)
     return;
 
   long leadTimeS = 0;
@@ -562,6 +566,9 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length) {
   case WStype_TEXT: {
     String msg = String((char *)payload);
     Serial.printf("[WSc] Received text: %s\n", msg.c_str());
+    if (msg.indexOf("_status") >= 0 || msg.indexOf("\"commands\"") >= 0) {
+      applyConfigFromPayload(msg);
+    }
     dispatchRemotePayload(msg);
   } break;
   }
@@ -574,26 +581,26 @@ void logEvent(int idx, const String &evt, const String &status,
   Serial.printf("📤 [%s] Pushing %s (Batch #%d)...\n", lineNames[idx].c_str(),
                 evt.c_str(), lines[idx].batchNumber);
 
-  // 1. Try WebSocket first (Instant)
-  bool sentWS = false;
+  // HTTP first — response body includes door_status / frame_status / arch_status for LEDs
+  bool okHttp = false;
   if (WiFi.status() == WL_CONNECTED) {
-    sentWS = webSocket.sendTXT(jsonData);
-    if (sentWS) {
-      Serial.printf("⚡ [%s] Sent via WebSocket\n", lineNames[idx].c_str());
+    okHttp = sendHTTPRequest(jsonData);
+    if (okHttp) {
+      Serial.printf("✓ [%s] Logged via HTTP (LEDs synced)\n", lineNames[idx].c_str());
     }
   }
 
-  // 2. Try HTTP as fallback (Reliable/Database)
+  // WebSocket notify (dashboard live); config still comes from HTTP body or /api/machine-config
   if (WiFi.status() == WL_CONNECTED) {
-    if (sendHTTPRequest(jsonData)) {
-      Serial.printf("✓ [%s] Successfully logged via HTTP\n",
-                    lineNames[idx].c_str());
-      return;
+    if (webSocket.sendTXT(jsonData)) {
+      Serial.printf("⚡ [%s] Also sent via WebSocket\n", lineNames[idx].c_str());
+    }
+    if (!okHttp) {
+      fetchMachineConfig();
     }
   }
 
-  // 3. Queue if both failed
-  if (queueIfOffline && !sentWS) {
+  if (!okHttp && queueIfOffline) {
     queueEvent(jsonData);
   }
 }
@@ -614,7 +621,8 @@ bool sendHTTPRequest(const String &jsonData, int retries) {
   
   http.addHeader("Content-Type", "application/json");
   http.setTimeout(HTTP_TIMEOUT);
-  http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+  // Railway and other hosts may 301 HTTP→HTTPS; must follow or buttons appear dead.
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
 
   for (int attempt = 0; attempt < retries; attempt++) {
@@ -715,7 +723,7 @@ void checkRemoteCommands() {
     http.begin(commandURL);
   }
   http.setTimeout(2000);
-
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
   int code = http.GET();
 
@@ -914,6 +922,63 @@ void syncStageFromServerConfig(int idx, const String &payload) {
   line.lastServerStageKey = stageKey;
 }
 
+/** Map dashboard lane status → local state + LEDs (idempotent; always refreshes LEDs). */
+void applyDashboardLaneStatus(int idx, const String &laneStatus) {
+  if (idx < 0 || idx >= NUM_LINES)
+    return;
+  String st = laneStatus;
+  st.trim();
+  st.toUpperCase();
+  if (st.length() == 0)
+    return;
+
+  LineData &line = lines[idx];
+  const State prev = line.currentState;
+  State next = IDLE;
+
+  if (st == "RUNNING")
+    next = RUNNING;
+  else if (st == "PAUSED")
+    next = PAUSED;
+  else if (st == "READY")
+    next = READY;
+  else if (st == "WAITING" || st == "PROCUREMENT")
+    next = PROCUREMENT;
+  else
+    next = IDLE; // STOPPED, FINISHED, IDLE, unknown
+
+  if (next == prev) {
+    updateLEDs(idx);
+    return;
+  }
+
+  if (next == RUNNING) {
+    if (prev == PAUSED)
+      line.totalPausedTime += millis() - line.pauseStartTime;
+    else if (prev == IDLE || prev == READY || prev == PROCUREMENT) {
+      line.batchStartTime = millis();
+      line.totalPausedTime = 0;
+      line.pauseStartTime = 0;
+      line.batchEndTime = 0;
+      line.stageTargetLogged = false;
+    }
+  } else if (next == PAUSED) {
+    if (prev == RUNNING)
+      line.pauseStartTime = millis();
+  } else if (next == IDLE) {
+    if (prev == PAUSED)
+      line.totalPausedTime += millis() - line.pauseStartTime;
+    if (prev == RUNNING || prev == PAUSED)
+      line.batchEndTime = millis();
+    line.procurementStartTime = 0;
+  }
+
+  line.currentState = next;
+  updateLEDs(idx);
+  Serial.printf("💡 [%s] LED sync ← dashboard %s\n", lineNames[idx].c_str(),
+                st.c_str());
+}
+
 void applyConfigFromPayload(const String &payload) {
   for (int i = 0; i < NUM_LINES; i++) {
     String expKey = "\"" + lineNames[i] + "_expected_s\":";
@@ -933,6 +998,14 @@ void applyConfigFromPayload(const String &payload) {
         lines[i].plannedQuantity = q;
     }
     syncStageFromServerConfig(i, payload);
+
+    String laneStatus;
+    String statusKeyA = "\"" + lineNames[i] + "_status\":\"";
+    String statusKeyB = "\"" + lineNames[i] + "_status\": \"";
+    if (extractJsonStringAfterKey(payload, statusKeyA, &laneStatus) ||
+        extractJsonStringAfterKey(payload, statusKeyB, &laneStatus)) {
+      applyDashboardLaneStatus(i, laneStatus);
+    }
   }
 }
 
@@ -1041,9 +1114,11 @@ void fetchMachineConfig() {
     http.begin(configURL);
   }
   http.setTimeout(HTTP_TIMEOUT);
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
   int code = http.GET();
   if (code != HTTP_CODE_OK && code != 200) {
+    Serial.printf("✗ Config fetch HTTP %d\n", code);
     http.end();
     return;
   }
