@@ -16,8 +16,11 @@
  * production stage stays aligned with the dashboard (Scale Saw, Edge Banding, …).
  * Emits expected_remaining_s, variance_s (actual−expected), STAGE_TARGET
  *   when active time reaches expected_duration_s (if configured).
- * Buttons (INPUT_PULLUP, LOW = pressed): short tap = PLAY, double = PAUSE
- *   while running, long hold = END, triple (idle) = PROCUREMENT.
+ * Buttons (INPUT_PULLUP, LOW = pressed):
+ *   1 tap  = start / deploy (unifiedPlay → START on API; server deploys if lane empty)
+ *   2 taps = pause (PAUSE while RUNNING)
+ *   long   = end job (END)
+ *   3 taps = procurement mode (idle only, optional)
  * LEDs (synced from API door_status / frame_status / arch_status every 10s and
  *   after each POST /data): Green = RUNNING, Yellow = PAUSED or READY (staged),
  *   Red = IDLE/STOPPED (no active job on lane).
@@ -157,7 +160,8 @@ void handleButton(int idx);
 void updateLEDs(int idx);
 void startBatch(int idx);
 void startBatchAt(int idx, unsigned long batchStartMillis);
-void unifiedPlay(int idx); // RESUME if paused, else START from IDLE/PROCUREMENT
+void startDeployedJob(int idx);
+void unifiedPlay(int idx); // 1 tap: deploy/start/resume per lane state
 void unifiedPlayAll();
 void pauseBatch(int idx);
 void resumeBatch(int idx);
@@ -398,6 +402,7 @@ void handleButton(int idx) {
     }
 
     if (pressDuration > LONG_PRESS_MS) {
+      // Long press = end
       endBatch(idx);
       line.clickCount = 0;
       return;
@@ -412,10 +417,10 @@ void handleButton(int idx) {
     line.clickCount = 0;
 
     if (clicks == 1) {
-      // Single click = PLAY (start new job or resume after pause)
+      // 1 tap = deploy (idle lane) / start (READY) / resume (PAUSED)
       unifiedPlay(idx);
     } else if (clicks == 2) {
-      // Double Click
+      // 2 taps = pause
       if (line.currentState == RUNNING)
         pauseBatch(idx);
     } else if (clicks == 3) {
@@ -438,12 +443,28 @@ void updateLEDs(int idx) {
   digitalWrite(RED_LEDS[idx], red ? HIGH : LOW);
 }
 
+void startDeployedJob(int idx) {
+  if (lines[idx].currentState != READY)
+    return;
+  lines[idx].batchStartTime = millis();
+  lines[idx].totalPausedTime = 0;
+  lines[idx].pauseStartTime = 0;
+  lines[idx].batchEndTime = 0;
+  lines[idx].lastStatusUpdate = millis();
+  lines[idx].currentState = RUNNING;
+  lines[idx].stageTargetLogged = false;
+  updateLEDs(idx);
+  Serial.printf("▶ [%s] Start deployed job (dashboard READY)\n", lineNames[idx].c_str());
+  logEvent(idx, "START", "RUNNING");
+}
+
 void unifiedPlay(int idx) {
   if (lines[idx].currentState == PAUSED) {
     resumeBatch(idx);
+  } else if (lines[idx].currentState == READY) {
+    startDeployedJob(idx);
   } else if (lines[idx].currentState == IDLE ||
-             lines[idx].currentState == PROCUREMENT ||
-             lines[idx].currentState == READY) {
+             lines[idx].currentState == PROCUREMENT) {
     startBatch(idx);
   }
 }
@@ -455,8 +476,9 @@ void unifiedPlayAll() {
   }
   unsigned long syncT = millis();
   for (int i = 0; i < NUM_LINES; i++) {
-    if (lines[i].currentState == IDLE || lines[i].currentState == READY ||
-        lines[i].currentState == PROCUREMENT)
+    if (lines[i].currentState == READY)
+      startDeployedJob(i);
+    else if (lines[i].currentState == IDLE || lines[i].currentState == PROCUREMENT)
       startBatchAt(i, syncT);
   }
 }
@@ -770,7 +792,7 @@ static bool parseLineTarget(const String &response, int *lineIdxOut) {
 void applyRemoteCommandForLine(int idx, const String &command) {
   if (idx < 0 || idx >= NUM_LINES)
     return;
-  if (command == "START")
+  if (command == "START" || command == "PLAY")
     unifiedPlay(idx);
   else if (command == "PAUSE")
     pauseBatch(idx);
@@ -1243,11 +1265,20 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
   const char *dashMachine =
       lineRef.serverMachine.length() > 0 ? lineRef.serverMachine.c_str() : "";
 
+  const char *gesture = "tap";
+  if (evt == "PAUSE")
+    gesture = "double";
+  else if (evt == "END")
+    gesture = "long";
+  else if (evt == "RESUME")
+    gesture = "tap";
+
   snprintf(buffer, sizeof(buffer),
            "{"
            "\"timestamp\":\"%s\","
            "\"batch_id\":%d,"
            "\"event\":\"%s\","
+           "\"gesture\":\"%s\","
            "\"status\":\"%s\","
            "\"machine\":\"%s\","
            "\"line\":\"%s\","
@@ -1269,7 +1300,7 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
            "\"dashboard_stage_index\":%d,"
            "\"dashboard_machine\":\"%s\""
            "}",
-           getTimestamp().c_str(), line.batchNumber, evt.c_str(),
+           getTimestamp().c_str(), line.batchNumber, evt.c_str(), gesture,
            status.c_str(), machineName.c_str(), lineNames[idx].c_str(),
            activeRuntimeSecs, totalElapsedSecs, accumulatedPauseSecs, leadTimeS,
            line.pauseCount, efficiency, productionRate, rssi, wifiQuality,
