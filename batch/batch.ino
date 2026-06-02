@@ -54,14 +54,14 @@ const int RED_LEDS[NUM_LINES] = {14, 21, 22};
 
 // Button timing
 const int LONG_PRESS_MS = 1500;
-const int DOUBLE_CLICK_MS = 300;
+const int DOUBLE_CLICK_MS = 380; // Wait for possible 2nd tap before acting on 1 tap
 
 // HTTP & Network
 #define MAX_RETRIES 3
 #define HTTP_TIMEOUT 5000
 #define STATUS_UPDATE_INTERVAL 60000 // Send status update every 60 seconds
 #define COMMAND_CHECK_INTERVAL 2000 // Check for remote commands every 2 seconds
-#define CONFIG_FETCH_INTERVAL_MS 10000 // Refresh lane status + LEDs from server
+#define CONFIG_FETCH_INTERVAL_MS 5000 // Keep LEDs aligned with dashboard
 #define MAX_QUEUE_SIZE 15           // Slightly increased for 3 lines
 #define BUTTON_DEBOUNCE_MS 45       // Ignore very short presses (noise)
 
@@ -74,12 +74,11 @@ const int DOUBLE_CLICK_MS = 300;
 const char *ssid = "Anas";
 const char *password = "1234567890";
 
-// Flask Server Configuration
-// Patched automatically from server PUBLIC_URL on backend start (re-flash after deploy).
-const char *serverIP = "192.168.1.29";
-const int serverPort = 5002;
-bool useHTTPS = false;
-String serverURL = "https://productionbackend-production-1b08.up.railway.app";
+// Railway production API (same host as dashboard REACT_APP_API_URL — no https:// prefix here)
+#define BACKEND_HOST "productionbackend-production-1b08.up.railway.app"
+const int serverPort = 443;
+bool useHTTPS = true;
+String serverURL = "";
 String commandURL = "";
 String configURL = "";
 
@@ -89,10 +88,8 @@ const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 0;
 
-// Machine Identifier
 String machineName = "FAM Production Hub";
-String lineName = "door";
-String lineNames[NUM_LINES] = {"door", "frame", "arch"};
+const char *lineNames[NUM_LINES] = {"door", "frame", "arch"};
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -108,9 +105,7 @@ struct LineData {
   // Button Handling
   unsigned long lastPress = 0;
   unsigned long pressedTime = 0;
-  unsigned long releasedTime = 0;
   bool pressed = false;
-  bool waitForDouble = false;
 
   // Batch Timer Variables
   unsigned long batchStartTime = 0;
@@ -183,23 +178,23 @@ void applyRemoteCommandForLine(int idx, const String &command);
 void dispatchRemotePayload(const String &payload);
 void applyConfigFromPayload(const String &payload);
 void applyDashboardLaneStatus(int idx, const String &laneStatus);
+void refreshLineFromServerCache(int idx);
+static bool isControlEvent(const String &evt);
 String buildJSONPayload(int idx, const String &evt, const String &status);
 void checkStageTargets();
 void resetStageTimerFromServer(int idx);
 void syncStageFromServerConfig(int idx, const String &payload);
 void buildServerEndpoints();
+bool verifyBackendConnection();
 String urlEncodeMachineName(const String &name);
 static bool extractJsonStringAfterKey(const String &payload, const String &key,
                                       String *out);
 
 // Utility Functions
 String getTimestamp();
-String getFormattedTime(unsigned long millisTime);
 float calculateEfficiency(unsigned long activeTime, unsigned long totalTime);
 void loadBatchNumbers();
 void saveBatchNumbers();
-void resetBatchNumber(int idx);
-void setBatchNumber(int idx, int newNumber);
 
 // ============================================================================
 // SETUP
@@ -252,29 +247,23 @@ void setup() {
 
     buildServerEndpoints();
     if (serverURL.length() == 0) {
-      Serial.println("✗ Server URLs not configured — check serverIP / useHTTPS in batch.ino");
+      Serial.println("✗ Server URLs not configured — check BACKEND_HOST / useHTTPS in batch.ino");
     } else {
-      Serial.printf("  Server URL: %s\n", serverURL.c_str());
-      Serial.printf("  Command URL: %s\n", commandURL.c_str());
-      Serial.printf("  Config URL: %s\n", configURL.c_str());
+      Serial.println("  Backend API (Railway):");
+      Serial.printf("    POST events:  %s\n", serverURL.c_str());
+      Serial.printf("    Commands:     %s\n", commandURL.c_str());
+      Serial.printf("    Lane sync:    %s\n", configURL.c_str());
+      verifyBackendConnection();
     }
-
-    // Sensible defaults until /api/machine-config returns per-lane targets
-    lines[0].expectedDurationSec = 0;
-    lines[1].expectedDurationSec = 0;
-    lines[2].expectedDurationSec = 0;
-    lines[0].plannedQuantity = 1;
-    lines[1].plannedQuantity = 1;
-    lines[2].plannedQuantity = 1;
 
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
     // WebSocket Setup
     if (serverURL.length() > 0) {
       if (useHTTPS) {
-        webSocket.beginSSL(serverIP, serverPort, "/ws");
+        webSocket.beginSSL(BACKEND_HOST, serverPort, "/ws");
       } else {
-        webSocket.begin(serverIP, serverPort, "/ws");
+        webSocket.begin(BACKEND_HOST, serverPort, "/ws");
       }
       webSocket.onEvent(webSocketEvent);
       webSocket.setReconnectInterval(5000);
@@ -335,7 +324,7 @@ void loop() {
             : lines[i].currentState == PROCUREMENT ? "PROCUREMENT"
                                                   : "?";
         Serial.printf(
-            "%s: Batch #%d | %s | exp %lds | qty %d\n", lineNames[i].c_str(),
+            "%s: Batch #%d | %s | exp %lds | qty %d\n", lineNames[i],
             lines[i].batchNumber, st, lines[i].expectedDurationSec,
             lines[i].plannedQuantity);
       }
@@ -356,8 +345,15 @@ void loop() {
         if (lines[i].currentState != IDLE)
           endBatch(i);
       }
-    } else if (command == "FETCHCONFIG") {
+    } else if (command == "FETCHCONFIG" || command == "SYNCAL") {
       fetchMachineConfig();
+    } else if (command == "LEDS") {
+      for (int i = 0; i < NUM_LINES; i++) {
+        Serial.printf("%s local=%d server=%s\n", lineNames[i],
+                      (int)lines[i].currentState,
+                      lines[i].serverLaneStatus.c_str());
+        updateLEDs(i);
+      }
     }
   }
 
@@ -394,8 +390,7 @@ void handleButton(int idx) {
 
   if (val == HIGH && line.pressed) {
     line.pressed = false;
-    line.releasedTime = millis();
-    unsigned long pressDuration = line.releasedTime - line.pressedTime;
+    unsigned long pressDuration = millis() - line.pressedTime;
 
     if (pressDuration < BUTTON_DEBOUNCE_MS) {
       return;
@@ -415,6 +410,9 @@ void handleButton(int idx) {
   if (line.clickCount > 0 && millis() - line.lastPress > DOUBLE_CLICK_MS) {
     int clicks = line.clickCount;
     line.clickCount = 0;
+
+    // Use last server status so buttons match dashboard even if local state drifted
+    refreshLineFromServerCache(idx);
 
     if (clicks == 1) {
       // 1 tap = deploy (idle lane) / start (READY) / resume (PAUSED)
@@ -443,7 +441,19 @@ void updateLEDs(int idx) {
   digitalWrite(RED_LEDS[idx], red ? HIGH : LOW);
 }
 
+static bool isControlEvent(const String &evt) {
+  return evt == "START" || evt == "PAUSE" || evt == "RESUME" || evt == "END";
+}
+
+void refreshLineFromServerCache(int idx) {
+  if (idx < 0 || idx >= NUM_LINES)
+    return;
+  if (lines[idx].serverLaneStatus.length() > 0)
+    applyDashboardLaneStatus(idx, lines[idx].serverLaneStatus);
+}
+
 void startDeployedJob(int idx) {
+  refreshLineFromServerCache(idx);
   if (lines[idx].currentState != READY)
     return;
   lines[idx].batchStartTime = millis();
@@ -454,15 +464,18 @@ void startDeployedJob(int idx) {
   lines[idx].currentState = RUNNING;
   lines[idx].stageTargetLogged = false;
   updateLEDs(idx);
-  Serial.printf("▶ [%s] Start deployed job (dashboard READY)\n", lineNames[idx].c_str());
+  Serial.printf("▶ [%s] Start deployed job (dashboard READY)\n", lineNames[idx]);
   logEvent(idx, "START", "RUNNING");
 }
 
 void unifiedPlay(int idx) {
+  refreshLineFromServerCache(idx);
   if (lines[idx].currentState == PAUSED) {
     resumeBatch(idx);
   } else if (lines[idx].currentState == READY) {
     startDeployedJob(idx);
+  } else if (lines[idx].currentState == RUNNING) {
+    return; // already running — use 2 taps to pause
   } else if (lines[idx].currentState == IDLE ||
              lines[idx].currentState == PROCUREMENT) {
     startBatch(idx);
@@ -509,12 +522,13 @@ void startBatchAt(int idx, unsigned long batchStartMillis) {
 
   updateLEDs(idx);
   Serial.printf("\n🚀 [%s] Starting Batch #%d (Lead Time: %ld s)\n",
-                lineNames[idx].c_str(), lines[idx].batchNumber, leadTimeS);
+                lineNames[idx], lines[idx].batchNumber, leadTimeS);
 
   logEvent(idx, "START", "RUNNING");
 }
 
 void pauseBatch(int idx) {
+  refreshLineFromServerCache(idx);
   if (lines[idx].currentState != RUNNING)
     return;
 
@@ -523,12 +537,13 @@ void pauseBatch(int idx) {
   lines[idx].pauseCount++;
 
   updateLEDs(idx);
-  Serial.printf("⏸ [%s] Pausing Batch #%d\n", lineNames[idx].c_str(),
+  Serial.printf("⏸ [%s] Pausing Batch #%d\n", lineNames[idx],
                 lines[idx].batchNumber);
   logEvent(idx, "PAUSE", "PAUSED");
 }
 
 void resumeBatch(int idx) {
+  refreshLineFromServerCache(idx);
   if (lines[idx].currentState != PAUSED)
     return;
 
@@ -536,12 +551,13 @@ void resumeBatch(int idx) {
   lines[idx].currentState = RUNNING;
 
   updateLEDs(idx);
-  Serial.printf("▶ [%s] Resuming Batch #%d\n", lineNames[idx].c_str(),
+  Serial.printf("▶ [%s] Resuming Batch #%d\n", lineNames[idx],
                 lines[idx].batchNumber);
   logEvent(idx, "RESUME", "RUNNING");
 }
 
 void endBatch(int idx) {
+  refreshLineFromServerCache(idx);
   if (lines[idx].currentState == IDLE)
     return;
 
@@ -557,7 +573,7 @@ void endBatch(int idx) {
   unsigned long duration =
       (lines[idx].batchEndTime - lines[idx].batchStartTime) / 1000;
   Serial.printf("✅ [%s] Ending Batch #%d (Duration: %lu s)\n",
-                lineNames[idx].c_str(), lines[idx].batchNumber, duration);
+                lineNames[idx], lines[idx].batchNumber, duration);
   logEvent(idx, "END", "STOPPED");
 }
 
@@ -571,7 +587,7 @@ void startProcurement(int idx) {
   updateLEDs(idx);
   Serial.printf(
       "📦 [%s] Entering PROCUREMENT Mode (Lead Time tracking started)\n",
-      lineNames[idx].c_str());
+      lineNames[idx]);
   logEvent(idx, "PROCUREMENT", "WAITING");
 }
 
@@ -603,7 +619,7 @@ void logEvent(int idx, const String &evt, const String &status,
               bool queueIfOffline) {
   String jsonData = buildJSONPayload(idx, evt, status);
 
-  Serial.printf("📤 [%s] Pushing %s (Batch #%d)...\n", lineNames[idx].c_str(),
+  Serial.printf("📤 [%s] Pushing %s (Batch #%d)...\n", lineNames[idx],
                 evt.c_str(), lines[idx].batchNumber);
 
   // HTTP first — response body includes door_status / frame_status / arch_status for LEDs
@@ -611,14 +627,14 @@ void logEvent(int idx, const String &evt, const String &status,
   if (WiFi.status() == WL_CONNECTED) {
     okHttp = sendHTTPRequest(jsonData);
     if (okHttp) {
-      Serial.printf("✓ [%s] Logged via HTTP (LEDs synced)\n", lineNames[idx].c_str());
+      Serial.printf("✓ [%s] Logged via HTTP (LEDs synced)\n", lineNames[idx]);
     }
   }
 
   // WebSocket notify (dashboard live); config still comes from HTTP body or /api/machine-config
   if (WiFi.status() == WL_CONNECTED) {
     if (webSocket.sendTXT(jsonData)) {
-      Serial.printf("⚡ [%s] Also sent via WebSocket\n", lineNames[idx].c_str());
+      Serial.printf("⚡ [%s] Also sent via WebSocket\n", lineNames[idx]);
     }
     if (!okHttp) {
       fetchMachineConfig();
@@ -627,6 +643,11 @@ void logEvent(int idx, const String &evt, const String &status,
 
   if (!okHttp && queueIfOffline) {
     queueEvent(jsonData);
+  }
+
+  // Authoritative LED state from dashboard after every button action
+  if (isControlEvent(evt) && WiFi.status() == WL_CONNECTED) {
+    fetchMachineConfig();
   }
 }
 
@@ -860,26 +881,47 @@ void buildServerEndpoints() {
   commandURL = "";
   configURL = "";
 
-  String host = String(serverIP);
-  host.trim();
-  if (host.length() == 0) {
-    Serial.println("✗ serverIP is empty — set PUBLIC_URL on backend or edit batch.ino");
-    return;
-  }
-
   const String encodedMachine = urlEncodeMachineName(machineName);
   const int port = serverPort > 0 ? serverPort : (useHTTPS ? 443 : 80);
 
   if (useHTTPS) {
-    serverURL = "https://" + host + "/data";
-    commandURL = "https://" + host + "/api/command?line=all";
-    configURL = "https://" + host + "/api/machine-config?machine=" + encodedMachine;
-  } else {
-    serverURL = "http://" + host + ":" + String(port) + "/data";
-    commandURL = "http://" + host + ":" + String(port) + "/api/command?line=all";
-    configURL = "http://" + host + ":" + String(port) + "/api/machine-config?machine=" +
+    serverURL = "https://" + String(BACKEND_HOST) + "/data";
+    commandURL = "https://" + String(BACKEND_HOST) + "/api/command?line=all";
+    configURL = "https://" + String(BACKEND_HOST) + "/api/machine-config?machine=" +
                 encodedMachine;
+  } else {
+    serverURL = "http://" + String(BACKEND_HOST) + ":" + String(port) + "/data";
+    commandURL = "http://" + String(BACKEND_HOST) + ":" + String(port) + "/api/command?line=all";
+    configURL = "http://" + String(BACKEND_HOST) + ":" + String(port) +
+                "/api/machine-config?machine=" + encodedMachine;
   }
+}
+
+bool verifyBackendConnection() {
+  if (WiFi.status() != WL_CONNECTED || !useHTTPS)
+    return false;
+
+  String healthUrl = String("https://") + BACKEND_HOST + "/health";
+  WiFiClientSecure client;
+  client.setInsecure();
+
+  HTTPClient http;
+  http.begin(client, healthUrl);
+  http.setTimeout(HTTP_TIMEOUT);
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+
+  int code = http.GET();
+  String body = http.getString();
+  http.end();
+
+  if (code == HTTP_CODE_OK || code == 200) {
+    Serial.printf("  ✓ Backend reachable (%s) — %s\n", BACKEND_HOST,
+                  body.substring(0, 60).c_str());
+    return true;
+  }
+  Serial.printf("  ✗ Backend health check failed HTTP %d (%s)\n", code,
+                BACKEND_HOST);
+  return false;
 }
 
 void resetStageTimerFromServer(int idx) {
@@ -894,7 +936,7 @@ void resetStageTimerFromServer(int idx) {
   line.stageTargetLogged = false;
   line.lastStatusUpdate = millis();
   Serial.printf("🔄 [%s] Stage timer synced from dashboard (stage %d)\n",
-                lineNames[idx].c_str(), line.serverStageIndex);
+                lineNames[idx], line.serverStageIndex);
 }
 
 void syncStageFromServerConfig(int idx, const String &payload) {
@@ -1000,7 +1042,7 @@ void applyDashboardLaneStatus(int idx, const String &laneStatus) {
 
   line.currentState = next;
   updateLEDs(idx);
-  Serial.printf("💡 [%s] LED sync ← dashboard %s\n", lineNames[idx].c_str(),
+  Serial.printf("💡 [%s] LED sync ← dashboard %s\n", lineNames[idx],
                 st.c_str());
 }
 
@@ -1051,7 +1093,7 @@ void dispatchRemotePayload(const String &payload) {
       String cmd;
       if (extractQuotedCommandAfterKey(payload, pos, "\"command\":", &cmd) ||
           extractQuotedCommandAfterKey(payload, pos, "\"command\": ", &cmd)) {
-        Serial.printf("📥 Remote Command (list %s): %s\n", lineNames[i].c_str(),
+        Serial.printf("📥 Remote Command (list %s): %s\n", lineNames[i],
                       cmd.c_str());
         applyRemoteCommandForLine(i, cmd);
         any = true;
@@ -1070,7 +1112,7 @@ void dispatchRemotePayload(const String &payload) {
       String keyB = "\"" + lineNames[i] + "\": \"";
       if (extractQuotedCommandAfterKey(payload, cmdBlock, keyA, &cmd) ||
           extractQuotedCommandAfterKey(payload, cmdBlock, keyB, &cmd)) {
-        Serial.printf("📥 Remote Command (map %s): %s\n", lineNames[i].c_str(),
+        Serial.printf("📥 Remote Command (map %s): %s\n", lineNames[i],
                       cmd.c_str());
         applyRemoteCommandForLine(i, cmd);
         any = true;
@@ -1108,7 +1150,7 @@ void dispatchRemotePayload(const String &payload) {
       }
       return;
     }
-    Serial.printf("📥 Remote Command for %s: %s\n", lineNames[lineSpec].c_str(),
+    Serial.printf("📥 Remote Command for %s: %s\n", lineNames[lineSpec],
                   cmd.c_str());
     applyRemoteCommandForLine(lineSpec, cmd);
     return;
@@ -1117,7 +1159,7 @@ void dispatchRemotePayload(const String &payload) {
   for (int i = 0; i < NUM_LINES; i++) {
     if (payload.indexOf(lineNames[i]) >= 0) {
       Serial.printf("📥 Remote Command (legacy match %s): %s\n",
-                    lineNames[i].c_str(), cmd.c_str());
+                    lineNames[i], cmd.c_str());
       applyRemoteCommandForLine(i, cmd);
       break;
     }
@@ -1153,7 +1195,7 @@ void fetchMachineConfig() {
   applyConfigFromPayload(body);
   Serial.printf(
       "✓ Machine config refreshed (%s exp %lds stage %d)\n",
-      lineNames[0].c_str(), lines[0].expectedDurationSec, lines[0].serverStageIndex);
+      lineNames[0], lines[0].expectedDurationSec, lines[0].serverStageIndex);
 }
 
 void checkStageTargets() {
@@ -1169,7 +1211,7 @@ void checkStageTargets() {
     if (activeS >= line.expectedDurationSec) {
       line.stageTargetLogged = true;
       Serial.printf("⏱ [%s] Expected stage time reached (%ld s)\n",
-                    lineNames[i].c_str(), line.expectedDurationSec);
+                    lineNames[i], line.expectedDurationSec);
       logEvent(i, "STAGE_TARGET", "RUNNING");
     }
   }
@@ -1195,6 +1237,7 @@ void reconnectWiFi() {
     reconnectDelay = 1000; // Reset on success
     Serial.println("✓ WiFi reconnected!");
     buildServerEndpoints();
+    verifyBackendConnection();
     fetchMachineConfig();
     processEventQueue();
   }
@@ -1257,28 +1300,17 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
   }
 
   char buffer[1600];
-  LineData &lineRef = lines[idx];
   const char *dashOrder =
-      lineRef.serverOrderId.length() > 0 ? lineRef.serverOrderId.c_str() : "";
-  int dashStage =
-      lineRef.serverStageIndex >= 0 ? lineRef.serverStageIndex : -1;
+      line.serverOrderId.length() > 0 ? line.serverOrderId.c_str() : "";
+  int dashStage = line.serverStageIndex >= 0 ? line.serverStageIndex : -1;
   const char *dashMachine =
-      lineRef.serverMachine.length() > 0 ? lineRef.serverMachine.c_str() : "";
-
-  const char *gesture = "tap";
-  if (evt == "PAUSE")
-    gesture = "double";
-  else if (evt == "END")
-    gesture = "long";
-  else if (evt == "RESUME")
-    gesture = "tap";
+      line.serverMachine.length() > 0 ? line.serverMachine.c_str() : "";
 
   snprintf(buffer, sizeof(buffer),
            "{"
            "\"timestamp\":\"%s\","
            "\"batch_id\":%d,"
            "\"event\":\"%s\","
-           "\"gesture\":\"%s\","
            "\"status\":\"%s\","
            "\"machine\":\"%s\","
            "\"line\":\"%s\","
@@ -1300,8 +1332,8 @@ String buildJSONPayload(int idx, const String &evt, const String &status) {
            "\"dashboard_stage_index\":%d,"
            "\"dashboard_machine\":\"%s\""
            "}",
-           getTimestamp().c_str(), line.batchNumber, evt.c_str(), gesture,
-           status.c_str(), machineName.c_str(), lineNames[idx].c_str(),
+           getTimestamp().c_str(), line.batchNumber, evt.c_str(),
+           status.c_str(), machineName.c_str(), lineNames[idx],
            activeRuntimeSecs, totalElapsedSecs, accumulatedPauseSecs, leadTimeS,
            line.pauseCount, efficiency, productionRate, rssi, wifiQuality,
            line.expectedDurationSec, line.plannedQuantity, expectedRemS,
@@ -1333,22 +1365,6 @@ String getTimestamp() {
   return String(buffer);
 }
 
-String getFormattedTime(unsigned long millisTime) {
-  unsigned long totalSeconds = millisTime / 1000;
-  unsigned long hours = totalSeconds / 3600;
-  unsigned long minutes = (totalSeconds % 3600) / 60;
-  unsigned long seconds = totalSeconds % 60;
-
-  char buffer[20];
-  if (hours > 0) {
-    snprintf(buffer, sizeof(buffer), "%02lu:%02lu:%02lu", hours, minutes,
-             seconds);
-  } else {
-    snprintf(buffer, sizeof(buffer), "%02lu:%02lu", minutes, seconds);
-  }
-  return String(buffer);
-}
-
 float calculateEfficiency(unsigned long activeTime, unsigned long totalTime) {
   if (totalTime == 0)
     return 0.0;
@@ -1362,7 +1378,7 @@ void loadBatchNumbers() {
     if (lines[i].batchNumber < 0 || lines[i].batchNumber > 100000) {
       lines[i].batchNumber = 0;
     }
-    Serial.printf("✓ [%s] Loaded batch number: %d\n", lineNames[i].c_str(),
+    Serial.printf("✓ [%s] Loaded batch number: %d\n", lineNames[i],
                   lines[i].batchNumber);
   }
 }
@@ -1375,17 +1391,3 @@ void saveBatchNumbers() {
   EEPROM.commit();
 }
 
-void resetBatchNumber(int idx) {
-  lines[idx].batchNumber = 0;
-  saveBatchNumbers();
-  Serial.printf("✓ [%s] Batch number reset\n", lineNames[idx].c_str());
-}
-
-void setBatchNumber(int idx, int newNumber) {
-  if (newNumber >= 0 && newNumber <= 100000) {
-    lines[idx].batchNumber = newNumber;
-    saveBatchNumbers();
-    Serial.printf("✓ [%s] Batch number set to: %d\n", lineNames[idx].c_str(),
-                  lines[idx].batchNumber);
-  }
-}
