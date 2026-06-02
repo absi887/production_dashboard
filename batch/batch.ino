@@ -18,6 +18,9 @@
  *   when active time reaches expected_duration_s (if configured).
  * Buttons (INPUT_PULLUP, LOW = pressed): short tap = PLAY, double = PAUSE
  *   while running, long hold = END, triple (idle) = PROCUREMENT.
+ * LEDs (synced from API door_status / frame_status / arch_status every 10s and
+ *   after each POST /data): Green = RUNNING, Yellow = PAUSED or READY (staged),
+ *   Red = IDLE/STOPPED (no active job on lane).
  * ============================================================================
  */
 
@@ -73,7 +76,7 @@ const char *password = "1234567890";
 const char *serverIP = "192.168.1.29";
 const int serverPort = 5002;
 bool useHTTPS = false;
-String serverURL = "";
+String serverURL = "https://productionbackend-production-1b08.up.railway.app";
 String commandURL = "";
 String configURL = "";
 
